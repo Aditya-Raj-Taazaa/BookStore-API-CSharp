@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Test_API.Controllers
 {
@@ -35,14 +36,14 @@ namespace Test_API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id,Car car)
         {
-            if (id != car.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(car).State = EntityState.Modified;
             try
             {
+                if (id != car.Id)
+                {
+                    return BadRequest();
+                }
+
+                _context.Entry(car).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -57,11 +58,12 @@ namespace Test_API.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(car);
 
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             try
