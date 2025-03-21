@@ -4,6 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
 using Microsoft.Extensions.Logging;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Test_API.Controllers
 {
@@ -13,10 +18,13 @@ namespace Test_API.Controllers
     {
         private readonly UserContext _context;
         private readonly ILogger<UserController> _logger;
-        public UserController(UserContext context, ILogger<UserController> logger)
+        private readonly IConfiguration _configuration;
+
+        public UserController(UserContext context, ILogger<UserController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet(Name = "GetUserDetails")]
@@ -59,7 +67,6 @@ namespace Test_API.Controllers
             }
 
             return Ok();
-
         }
 
         [HttpDelete("{id}")]
@@ -120,21 +127,28 @@ namespace Test_API.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(string email,string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
-            try {
+            try
+            {
                 var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email && u.Password == password);
-                return user != null ? Ok(user) : StatusCode(404);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var token = GenerateJwtToken(user);
+                return Ok(new { token });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Error on Login");
+                _logger.LogError(ex, "Error on Login");
                 return StatusCode(500);
             }
         }
 
         [HttpPost("SignUp")]
-        public async Task<IActionResult> Signup(string name,string email,string password)
+        public async Task<IActionResult> Signup(string name, string email, string password)
         {
             try
             {
@@ -152,7 +166,7 @@ namespace Test_API.Controllers
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(Get_By_Id), new { id = user.Id }, user);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error on SignUp");
                 return StatusCode(500);
@@ -160,17 +174,38 @@ namespace Test_API.Controllers
         }
 
         [HttpGet("Header-Test")]
-        public async Task<ActionResult> CustomHeader()
+        public ActionResult CustomHeader()
         {
-            HttpContext.Response.Headers.Add("x-my-custom-header","Accepted");
+            HttpContext.Response.Headers.Append("x-my-custom-header", "Accepted");
             return Ok();
         }
 
         private bool UserExists(int id)
         {
-            //return _context.Users.Any(e => e.Id == id);
             var user = _context.Users.Find(id);
-            return user != null ? true : false;
+            return user != null;
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddDays(Convert.ToDouble(_configuration["Jwt:ExpireDays"])),
+                signingCredentials: creds);
+
+            Console.WriteLine(token);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
