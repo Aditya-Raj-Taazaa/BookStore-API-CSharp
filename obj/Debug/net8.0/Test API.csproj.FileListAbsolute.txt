@@ -172,3 +172,6 @@ C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Tes
 C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\obj\Debug\net8.0\Test API.pdb
 C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\obj\Debug\net8.0\Test API.genruntimeconfig.cache
 C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\obj\Debug\net8.0\ref\Test API.dll
+C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\bin\Debug\net8.0\Npgsql.dll
+C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\aditya.raj\OneDrive - Taazaa Tech Pvt Ltd\Desktop\Projects\Test API\Test API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

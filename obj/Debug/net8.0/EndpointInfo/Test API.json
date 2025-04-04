@@ -446,6 +446,10 @@
   "components": {
     "schemas": {
       "Car": {
+        "required": [
+          "make",
+          "model"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -468,6 +472,11 @@
         "additionalProperties": false
       },
       "User": {
+        "required": [
+          "email",
+          "name",
+          "password"
+        ],
         "type": "object",
         "properties": {
           "id": {

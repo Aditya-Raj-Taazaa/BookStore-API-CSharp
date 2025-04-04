@@ -12,101 +12,92 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using System.Reflection;
+using System.Formats.Asn1;
 
-// var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-// // Add services to the container.
+// Add services to the container.
 
-// builder.Services.AddControllers();
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// // Configure JWT authentication
-// builder.Services.AddAuthentication(options =>
-// {
-//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-// })
-// .AddJwtBearer(options =>
-// {
-//     options.TokenValidationParameters = new TokenValidationParameters
-//     {
-//         ValidateIssuer = true,
-//         ValidateAudience = true,
-//         ValidateLifetime = true,
-//         ValidateIssuerSigningKey = true,
-//         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//         ValidAudience = builder.Configuration["Jwt:Audience"],
-//         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-//     };
-// });
-
-// // Add services to the container.
-// builder.Services.AddControllers();
-// builder.Services.AddDbContext<UserContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// builder.Services.AddDbContext<CarContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-// var app = builder.Build();
-
-// // Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-//     app.UseDeveloperExceptionPage();
-// }
-
-// app.UseHttpsRedirection();
-
-// app.UseAuthorization();
-
-// app.MapControllers();
-
-// app.Run();
-
-namespace Test_API
+// Configure JWT authentication
+builder.Services.AddAuthentication(options =>
 {
-    public class Test
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        public string Func(int k)
-        {
-            string result="";
-            if(k%2==0)
-            {
-                for(int i=0;i<k/2;i++)
-                {
-                    result += "adak ";
-                }
-                result = result.Substring(0, result.Length - 1);
-            }
-            else
-            {
-                for(int i=0;i<k/2;i++)
-                {
-                    result += "adak ";
-                }
-                result+="anane";
-            }
-            return result;            
-        }
-        public static string[] Solution(string str)
-        {
-            return [];
-        }
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 
-        public class Program
-        {
-            public static void Main()
-            {
-                Test test = new();
-                var result = test.Func(8);
-                
-                Console.WriteLine(result);
-            }
-        }
-    }
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddDbContext<UserContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<CarContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+//namespace Test_API
+//{
+//    public class Test
+//    {
+//        // Generic method to describe the input
+//        public string DescribeInput<T>(T input)
+//        {
+//            return $"Input Type: {typeof(T)}, Input Value: {input}";
+//        }
+//    }
+
+//    public class Program
+//    {
+//        public static void Main()
+//        {
+//            Console.WriteLine("Enter a value:");
+//            int input = Console.Read(); // Accept input as a string
+//            Test test = new();
+
+//            MethodInfo methodInfo = typeof(Test).GetMethod("DescribeInput");
+//            MethodInfo genericMethod = methodInfo.MakeGenericMethod(typeof(string));
+//            object result = genericMethod.Invoke(test, new object[] { input });
+
+//            // var result = test.DescribeInput<int>(input);
+//            var result2 = test.DescribeInput<string>(input.ToString());
+
+//            // Print the result
+//            Console.WriteLine(result + "-"+ result2);
+//        }
+//    }
+//}

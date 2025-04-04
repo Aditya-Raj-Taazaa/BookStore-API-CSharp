@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\aditya.raj\\OneDrive - Taazaa Tech Pvt Ltd\\Desktop\\Projects\\Test API\\Test API\\Test API.csproj": {
-      "version": "1.0.1",
+      "version": "1.0.0",
       "restore": {
         "projectUniqueName": "C:\\Users\\aditya.raj\\OneDrive - Taazaa Tech Pvt Ltd\\Desktop\\Projects\\Test API\\Test API\\Test API.csproj",
         "projectName": "Test API",
@@ -77,6 +77,10 @@
             "Microsoft.OpenApi": {
               "target": "Package",
               "version": "[1.6.14, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[9.0.4, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
