@@ -57,9 +57,7 @@ namespace Test_API.Controllers
                     throw;
                 }
             }
-
             return Ok(car);
-
         }
 
         [HttpDelete("{id}")]
@@ -125,7 +123,7 @@ namespace Test_API.Controllers
         {
             //return _context.Cars.Any(e => e.Id == id);
             var car = _context.Cars.Find(id);
-            return car != null ? true : false;
+            return car != null;
         }
     }
 }

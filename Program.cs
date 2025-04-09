@@ -16,19 +16,21 @@ using System.Reflection;
 using System.Formats.Asn1;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var Configuration = builder.Configuration;
+var Services = builder.Services;
 // Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+Services.AddControllers();
+Services.AddEndpointsApiExplorer();
+Services.AddSwaggerGen();
 
 // Configure JWT authentication
-builder.Services.AddAuthentication(options =>
+Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
+
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -37,19 +39,20 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        ValidIssuer = Configuration["Jwt:Issuer"],
+        ValidAudience = Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
     };
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddDbContext<UserContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+Services.AddControllers();
 
-builder.Services.AddDbContext<CarContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+Services.AddDbContext<UserContext>(options =>
+    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+Services.AddDbContext<CarContext>(options =>
+    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
 
 var app = builder.Build();
