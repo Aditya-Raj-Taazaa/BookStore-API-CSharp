@@ -37,10 +37,10 @@ Services.AddAuthentication(options =>
 // Add services to the container.
 Services.AddControllers();
 
-Services.AddDbContext<UserContext>(options =>
+Services.AddDbContextPool<UserContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-Services.AddDbContext<CarContext>(options =>
+Services.AddDbContextPool<CarContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
 
