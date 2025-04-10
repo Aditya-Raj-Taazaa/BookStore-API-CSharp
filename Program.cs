@@ -7,6 +7,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 var Services = builder.Services;
+
 // Add services to the container.
 
 Services.AddControllers();
@@ -43,6 +44,26 @@ Services.AddDbContextPool<UserContext>(options =>
 Services.AddDbContextPool<CarContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+void ApplyMigrations(WebApplication app)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<CarContext>();
+
+        // Check and apply pending migrations
+        var pendingMigrations = dbContext.Database.GetPendingMigrations();
+        if (pendingMigrations.Any())
+        {
+            Console.WriteLine("Applying pending migrations...");
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations applied successfully.");
+        }
+        else
+        {
+            Console.WriteLine("No pending migrations found.");
+        }
+    }
+}
 
 var app = builder.Build();
 
@@ -52,6 +73,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
+    ApplyMigrations(app);
 }
 
 app.UseHttpsRedirection();
@@ -61,3 +83,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

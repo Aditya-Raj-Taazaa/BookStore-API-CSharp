@@ -467,6 +467,17 @@
           "year": {
             "type": "integer",
             "format": "int32"
+          },
+          "wheels": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
           }
         },
         "additionalProperties": false
