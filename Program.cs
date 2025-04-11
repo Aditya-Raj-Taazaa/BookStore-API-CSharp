@@ -1,3 +1,5 @@
+// Move the `MyCustomMiddleware` class to the bottom of the file to ensure top-level statements are at the top.
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
@@ -20,7 +22,6 @@ Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -76,6 +77,8 @@ if (app.Environment.IsDevelopment())
     ApplyMigrations(app);
 }
 
+app.UseMiddleware<MyCustomMiddleware>(); // Middleware registration.
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -84,3 +87,20 @@ app.MapControllers();
 
 app.Run();
 
+// Move the `MyCustomMiddleware` class here to ensure top-level statements are at the top.
+public class MyCustomMiddleware
+{
+    public readonly RequestDelegate _next;
+
+    public MyCustomMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        Console.WriteLine("Calling Middleware");
+        await _next(context);
+        Console.WriteLine("Middleware Executed");
+    }
+}
