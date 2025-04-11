@@ -98,8 +98,9 @@ public class MyCustomMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        Console.WriteLine("Calling Middleware");
+        DateTime StartTime = DateTime.Now;
         await _next(context);
-        Console.WriteLine("Middleware Executed");
+        DateTime EndTime= DateTime.Now;
+        Console.WriteLine($"Time taken by the Process : {(StartTime-EndTime).ToString("fff")}");
     }
 }
