@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
     ApplyMigrations(app);
 }
 
-app.UseMiddleware<MyCustomMiddleware>(); // Middleware registration.
+app.UseMiddleware<MyCustomMiddleware>(); 
 
 app.UseHttpsRedirection();
 
@@ -87,7 +87,6 @@ app.MapControllers();
 
 app.Run();
 
-// Move the `MyCustomMiddleware` class here to ensure top-level statements are at the top.
 public class MyCustomMiddleware
 {
     public readonly RequestDelegate _next;
