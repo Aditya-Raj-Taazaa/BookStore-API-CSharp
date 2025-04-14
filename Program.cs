@@ -87,6 +87,8 @@ app.MapControllers();
 
 app.Run();
 
+
+
 public class MyCustomMiddleware
 {
     public readonly RequestDelegate _next;
@@ -95,12 +97,49 @@ public class MyCustomMiddleware
     {
         _next = next;
     }
+    static string StatusColor(string method)
+    {
+        if (method == "GET")
+            return "Green";
+        else if (method == "PUT")
+            return "Blue";
+        else if (method == "DELETE")
+            return "Red";
+        else
+            return "Yellow";     
+    }
 
     public async Task Invoke(HttpContext context)
     {
-        DateTime StartTime = DateTime.Now;
+        DateTime startTime = DateTime.Now;
+
         await _next(context);
-        DateTime EndTime= DateTime.Now;
-        Console.WriteLine($"Time taken by the Process : {(StartTime-EndTime).ToString("fff")}");
+
+        DateTime endTime = DateTime.Now;
+        var response = context.Response;
+        var request = context.Request;
+
+        var host = request.Headers.FirstOrDefault(h => h.Key == "Host").Value;
+
+        Console.ForegroundColor = ConsoleColor.Blue; 
+        Console.WriteLine($"Time taken by the process: {(endTime - startTime).TotalMilliseconds} ms \n");
+
+        string colorcode = StatusColor(request.Method);
+
+        if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor)) 
+            Console.ForegroundColor = parsedColor;
+        else
+            Console.ForegroundColor = ConsoleColor.Gray; // Fallback color
+
+        Console.WriteLine($"Method: {request.Method}");
+        Console.WriteLine($"Endpoint: {host}" + $"{request.Path.Value}");
+
+        Console.WriteLine($"Response Status Code: {response.StatusCode}");
+
+        Console.WriteLine($"Content Type: {response.ContentType}");
+        Console.WriteLine($"Request Body: {await new StreamReader(request.Body).ReadToEndAsync()}");
+        Console.WriteLine($"Response Body : {response.Body.ToString()}");
+        Console.WriteLine($"Request Cookies: {string.Join(", ", request.Cookies.Select(c => $"{c.Key}={c.Value}"))}");
+        Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
     }
 }
