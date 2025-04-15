@@ -1,4 +1,4 @@
-// Move the `MyCustomMiddleware` class to the bottom of the file to ensure top-level statements are at the top.
+﻿// Move the `MyCustomMiddleware` class to the bottom of the file to ensure top-level statements are at the top.
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
     ApplyMigrations(app);
 }
 
-app.UseMiddleware<MyCustomMiddleware>(); 
+app.UseMiddleware<CustomMiddleware>(); 
 
 app.UseHttpsRedirection();
 
@@ -89,11 +89,11 @@ app.Run();
 
 
 
-public class MyCustomMiddleware
+public class CustomMiddleware
 {
     public readonly RequestDelegate _next;
 
-    public MyCustomMiddleware(RequestDelegate next)
+    public CustomMiddleware(RequestDelegate next)
     {
         _next = next;
     }
@@ -112,7 +112,7 @@ public class MyCustomMiddleware
     public async Task Invoke(HttpContext context)
     {
         DateTime startTime = DateTime.Now;
-
+        Console.WriteLine("🔀 Middleware Begins");
         await _next(context);
 
         DateTime endTime = DateTime.Now;
@@ -121,12 +121,12 @@ public class MyCustomMiddleware
 
         var host = request.Headers.FirstOrDefault(h => h.Key == "Host").Value;
 
-        Console.ForegroundColor = ConsoleColor.Blue; 
+        Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine($"Time taken by the process: {(endTime - startTime).TotalMilliseconds} ms \n");
 
         string colorcode = StatusColor(request.Method);
 
-        if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor)) 
+        if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor))
             Console.ForegroundColor = parsedColor;
         else
             Console.ForegroundColor = ConsoleColor.Gray; // Fallback color
@@ -141,5 +141,6 @@ public class MyCustomMiddleware
         Console.WriteLine($"Response Body : {response.Body.ToString()}");
         Console.WriteLine($"Request Cookies: {string.Join(", ", request.Cookies.Select(c => $"{c.Key}={c.Value}"))}");
         Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+        Console.ResetColor();
     }
 }

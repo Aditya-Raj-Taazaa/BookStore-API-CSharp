@@ -1,20 +1,70 @@
-﻿using System.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
-using Microsoft.Extensions.Logging;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Test_API.Controllers
 {
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class LoggerResourceFilter : Attribute, IResourceFilter
+    {
+        public void OnResourceExecuting(ResourceExecutingContext context)
+        {
+            Console.WriteLine(" ➡️ Request is Starting ➡️");
+        }
+
+        public void OnResourceExecuted(ResourceExecutedContext context)
+        {
+            Console.WriteLine(" ✅ Request is Completed ✅");
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class InputValidatorFilter : Attribute, IActionFilter
+    {
+        bool changes = false;
+        public void OnActionExecuting(ActionExecutingContext context)
+        {
+            string spaces = " ";
+            if(context.ActionArguments.Any(arg => arg.Value == null))
+            {
+                context.Result = new BadRequestObjectResult("Input cannot be null.");
+                changes= true;
+                return;
+            }
+
+            if (context.ActionArguments.Any(arg => 
+            arg.Value is string str && (str.Contains(spaces) || str != str.Trim()))
+            )
+            {
+                context.Result = new BadRequestObjectResult("Input cannot contain only spaces or have leading/trailing spaces.");
+                changes = true;
+                return;
+            }
+
+            // Validate the model state
+            if (!context.ModelState.IsValid)
+            {
+                context.Result = new BadRequestObjectResult(context.ModelState);
+            }
+        }
+
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+            if(changes)
+            Console.WriteLine("Input Sanitation Completed ✔️");
+        }
+    }
+
     [ApiController]
     [Route("api/Users")]
+    
     public class UserController : ControllerBase
     {
         private readonly UserContext _context;
@@ -29,6 +79,7 @@ namespace Test_API.Controllers
         }
 
         [HttpGet(Name = "GetUserDetails")]
+        [LoggerResourceFilter]
         public async Task<IEnumerable<User>> Get()
         {
             return await _context.Users.ToListAsync();
@@ -43,6 +94,7 @@ namespace Test_API.Controllers
         }
 
         [HttpPut("{id}")]
+        [LoggerResourceFilter]
         public async Task<IActionResult> Put(int id, User user)
         {
             if (id != user.Id)
@@ -128,24 +180,40 @@ namespace Test_API.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login()
         {
             try
             {
-                var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email && u.Password == password);
+                
+                var loginData = await System.Text.Json.JsonSerializer.DeserializeAsync<LoginRequest>(Request.Body);
+
+                var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == loginData.Email && u.Password == loginData.Password);
+                Console.WriteLine($"User : {loginData.Email}, Pass : {loginData.Password}");
+
                 if (user == null)
                 {
-                    return NotFound();
+                    return Unauthorized("Invalid email or password.");
                 }
 
                 var token = GenerateJwtToken(user);
                 return Ok(new { token });
             }
+            catch (System.Text.Json.JsonException ex)
+            {
+                _logger.LogError(ex, "Invalid JSON format in Login request.");
+                return BadRequest("Invalid JSON format.");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error on Login");
-                return StatusCode(500);
+                return StatusCode(500, "Internal server error");
             }
+        }
+
+        public class LoginRequest
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
         }
 
         [HttpPost("SignUp")]
