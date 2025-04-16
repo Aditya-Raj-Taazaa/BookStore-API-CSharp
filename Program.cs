@@ -1,55 +1,38 @@
-﻿// Move the `MyCustomMiddleware` class to the bottom of the file to ensure top-level statements are at the top.
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Test_API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 var Services = builder.Services;
 
-// Add services to the container.
+// Add services to the container
+Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
-Services.AddControllers();
 Services.AddEndpointsApiExplorer();
 Services.AddSwaggerGen();
-
-// Configure JWT authentication
-Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = Configuration["Jwt:Issuer"],
-        ValidAudience = Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
-    };
-});
-
-// Add services to the container.
 Services.AddControllers();
 
-Services.AddDbContextPool<UserContext>(options =>
-    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddTransient<DataSeeder>();
 
-Services.AddDbContextPool<CarContext>(options =>
+
+
+Services.AddDbContextPool<BookdbContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
 void ApplyMigrations(WebApplication app)
 {
     using (var scope = app.Services.CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<CarContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BookdbContext>();
 
         // Check and apply pending migrations
         var pendingMigrations = dbContext.Database.GetPendingMigrations();
@@ -67,6 +50,13 @@ void ApplyMigrations(WebApplication app)
 }
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var seeder = services.GetRequiredService<DataSeeder>();
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -106,7 +96,7 @@ public class CustomMiddleware
         else if (method == "DELETE")
             return "Red";
         else
-            return "Yellow";     
+            return "Yellow";
     }
 
     public async Task Invoke(HttpContext context)
@@ -125,6 +115,7 @@ public class CustomMiddleware
         Console.WriteLine($"Time taken by the process: {(endTime - startTime).TotalMilliseconds} ms \n");
 
         string colorcode = StatusColor(request.Method);
+
 
         if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor))
             Console.ForegroundColor = parsedColor;
