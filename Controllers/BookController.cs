@@ -5,6 +5,7 @@ using Test_API.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Test_API.ActionFilters;
+using Test_API.ExceptionFilters;
 
 namespace Test_API.Controllers
 {
@@ -28,6 +29,7 @@ namespace Test_API.Controllers
             return await _context.Books.ToListAsync();
         }
 
+        [GlobalExceptionFilter]
         [HttpPost]
         public async Task<ActionResult<Book>> Post(Book Book)
         {
@@ -35,6 +37,7 @@ namespace Test_API.Controllers
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = Book.Id }, Book);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Book Book)
@@ -87,6 +90,7 @@ namespace Test_API.Controllers
             }
         }
 
+        [ExecutionTimeFilter]
         [HttpGet("v1/{id}")]
         public async Task<IActionResult> Get_By_Id(int id)
         {
@@ -128,7 +132,7 @@ namespace Test_API.Controllers
             return Ok(book);
         }
 
-
+        [ExecutionTimeFilter]
         [HttpGet("count")]
         public async Task<IActionResult> Count_Books()
         {
