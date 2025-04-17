@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Test_API.ExceptionFilters;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Test_API.Services;
+using System.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -24,6 +26,7 @@ Services.AddEndpointsApiExplorer();
 Services.AddSwaggerGen();
 
 Services.AddTransient<DataSeeder>();
+
 Services.AddSingleton<AppInfoService>();
 Services.AddScoped<RequestAuditService>();
 Services.AddTransient<FormatterService>();
@@ -87,10 +90,12 @@ app.Run();
 public class CustomMiddleware
 {
     public readonly RequestDelegate _next;
+    public readonly AppInfoService _appInfoService;
 
-    public CustomMiddleware(RequestDelegate next)
+    public CustomMiddleware(RequestDelegate next, AppInfoService appInfoService)
     {
         _next = next;
+        _appInfoService = appInfoService;
     }
     static string StatusColor(string method)
     {
@@ -107,6 +112,10 @@ public class CustomMiddleware
     public async Task Invoke(HttpContext context)
     {
         DateTime startTime = DateTime.Now;
+        
+        context.Response.Headers["X-App-Name"] = _appInfoService.GetAppName();
+        context.Response.Headers["X-App-Version"] = _appInfoService.GetVersion();
+        
         Console.WriteLine("🔀 Middleware Begins");
         await _next(context);
 

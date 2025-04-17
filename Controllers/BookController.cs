@@ -101,27 +101,9 @@ namespace Test_API.Controllers
             }
         }
 
+        
+        
         [ExecutionTimeFilter]
-        [HttpGet("v1/{id}")]
-        public async Task<IActionResult> Get_By_Id(int id)
-        {
-            try
-            {
-                var Book = await _context.Books.FindAsync(id);
-                if (Book == null)
-                {
-                    return NotFound();
-                }
-                
-                return Ok(Book);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error while getting Book details with {id}");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
         [HttpGet("v2/{id}")]
         public async Task<IActionResult> GetBook(int id)
         {

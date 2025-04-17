@@ -30,6 +30,5 @@ namespace Test_API.Services
             Console.WriteLine($"Formatter: {formatted} ✍️");
             return formatted;
         }
-
     }
 }
