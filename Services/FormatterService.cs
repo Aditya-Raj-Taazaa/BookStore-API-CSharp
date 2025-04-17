@@ -4,15 +4,32 @@ namespace Test_API.Services
 {
     public class FormatterService
     {
-        public string BioFormat(string inp)
+        public string BioFormat(string input)
         {
-            if (string.IsNullOrWhiteSpace(inp))
+            if (string.IsNullOrWhiteSpace(input))
                 return string.Empty;
 
-            var trimmed = inp.Trim().ToLower();
-            TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
-            Console.WriteLine($"Formatter Service Completed {trimmed} ✍️");
-            return textInfo.ToTitleCase(trimmed);
+            input = input.Trim().ToLower();
+            char[] chars = input.ToCharArray();
+            bool capitalizeNext = true;
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (char.IsWhiteSpace(chars[i]))
+                {
+                    capitalizeNext = true;
+                }
+                else if (capitalizeNext && char.IsLetter(chars[i]))
+                {
+                    chars[i] = char.ToUpper(chars[i]);
+                    capitalizeNext = false;
+                }
+            }
+
+            string formatted = new string(chars);
+            Console.WriteLine($"Formatter: {formatted} ✍️");
+            return formatted;
         }
+
     }
 }
