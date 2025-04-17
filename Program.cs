@@ -4,24 +4,29 @@ using Test_API.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Test_API.Data;
+using Microsoft.Extensions.Options;
+using Test_API.ExceptionFilters;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Test_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 var Services = builder.Services;
 
 // Add services to the container
-Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
+Services.AddControllers(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
+
 
 Services.AddEndpointsApiExplorer();
 Services.AddSwaggerGen();
-Services.AddControllers();
 
-builder.Services.AddTransient<DataSeeder>();
+Services.AddTransient<DataSeeder>();
+Services.AddSingleton<AppInfoService>();
+Services.AddScoped<RequestAuditService>();
+Services.AddTransient<FormatterService>();
 
 
 
@@ -105,14 +110,13 @@ public class CustomMiddleware
         Console.WriteLine("🔀 Middleware Begins");
         await _next(context);
 
-        DateTime endTime = DateTime.Now;
         var response = context.Response;
         var request = context.Request;
 
         var host = request.Headers.FirstOrDefault(h => h.Key == "Host").Value;
 
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"Time taken by the process: {(endTime - startTime).TotalMilliseconds} ms \n");
+        Console.WriteLine($"Time Stamp : {(startTime)} \n");
 
         string colorcode = StatusColor(request.Method);
 

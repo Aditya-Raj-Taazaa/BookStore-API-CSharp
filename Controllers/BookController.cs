@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Test_API.ActionFilters;
 using Test_API.ExceptionFilters;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Test_API.Services;
 
 namespace Test_API.Controllers
 {
@@ -13,23 +15,32 @@ namespace Test_API.Controllers
     [Route("api/Books")]
     public class BookController : ControllerBase
     {
-        private readonly BookdbContext _context; // Ensure the type matches the constructor parameter
+        private readonly BookdbContext _context; 
         private readonly ILogger<BookController> _logger;
+        public readonly AppInfoService _appInfoService;
+        private readonly RequestAuditService _requestAuditService;
 
-        public BookController(BookdbContext context, ILogger<BookController> logger) // Change parameter type to BookdbContext
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, RequestAuditService requestAuditService) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
+            _appInfoService = appInfoService;
+            _requestAuditService = requestAuditService;
         }
+       
+        
 
         [ExecutionTimeFilter]
         [HttpGet(Name = "GetBookDetails")]
+        
         public async Task<IEnumerable<Book>> Get()
         {
+            Request.Headers["X-App-Name"] = _appInfoService.GetAppName();
+            Response.Headers["X-App-Version"] =_appInfoService.GetVersion();
             return await _context.Books.ToListAsync();
         }
 
-        [GlobalExceptionFilter]
+        
         [HttpPost]
         public async Task<ActionResult<Book>> Post(Book Book)
         {
@@ -40,6 +51,7 @@ namespace Test_API.Controllers
 
 
         [HttpPut("{id}")]
+        
         public async Task<IActionResult> Put(int id, Book Book)
         {
             try
@@ -67,7 +79,6 @@ namespace Test_API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -77,7 +88,7 @@ namespace Test_API.Controllers
                 {
                     return NotFound();
                 }
-
+                _requestAuditService.LogWrite("Book",id);
                 _context.Books.Remove(Book);
                 await _context.SaveChangesAsync();
 
@@ -101,6 +112,7 @@ namespace Test_API.Controllers
                 {
                     return NotFound();
                 }
+                
                 return Ok(Book);
             }
             catch (Exception ex)
@@ -127,8 +139,9 @@ namespace Test_API.Controllers
                         .FirstOrDefault()
                 })
                 .FirstOrDefaultAsync();
-
+            _requestAuditService.LogWrite("Book", id);
             if (book == null) return NotFound();
+            
             return Ok(book);
         }
 

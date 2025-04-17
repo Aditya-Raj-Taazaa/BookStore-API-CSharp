@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Diagnostics;
+using Test_API.Services;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Test_API.Controllers
@@ -35,12 +36,14 @@ namespace Test_API.Controllers
         private readonly BookdbContext _context;
         private readonly ILogger<AuthorController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly FormatterService _formatterService;
 
-        public AuthorController(BookdbContext context, ILogger<AuthorController> logger, IConfiguration configuration)
+        public AuthorController(BookdbContext context, ILogger<AuthorController> logger, IConfiguration configuration, FormatterService formatter)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _formatterService = formatter;
         }
 
         [HttpGet(Name = "GetUserDetails")]
@@ -53,6 +56,7 @@ namespace Test_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Author>> Post(Author author)
         {
+            author.Bio = _formatterService.BioFormat(author.Bio);
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = author.Id }, author);
@@ -69,7 +73,7 @@ namespace Test_API.Controllers
             _context.Entry(author).State = EntityState.Modified;
             try
             {
-                if (!AuthorExists(id)) 
+                if (!AuthorExists(id))
                 {
                     return NotFound();
                 }
@@ -80,9 +84,9 @@ namespace Test_API.Controllers
             {
                 throw;
             }
-
             return Ok();
         }
+
         private bool AuthorExists(int id)
         {
             //return _context.Books.Any(e => e.Id == id);
