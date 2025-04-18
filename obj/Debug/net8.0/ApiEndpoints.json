@@ -205,22 +205,6 @@
   },
   {
     "ContainingType": "Test_API.Controllers.BookController",
-    "Method": "Get_By_Id",
-    "RelativePath": "api/Books/v1/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Test_API.Controllers.BookController",
     "Method": "GetBook",
     "RelativePath": "api/Books/v2/{id}",
     "HttpMethod": "GET",

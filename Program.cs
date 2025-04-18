@@ -9,6 +9,7 @@ using Test_API.ExceptionFilters;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Test_API.Services;
 using System.Data;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,7 @@ Services.AddSwaggerGen();
 Services.AddTransient<DataSeeder>();
 
 Services.AddSingleton<AppInfoService>();
-Services.AddScoped<RequestAuditService>();
+Services.AddSingleton<RequestAuditService>();
 Services.AddTransient<FormatterService>();
 
 
@@ -75,7 +76,7 @@ if (app.Environment.IsDevelopment())
     ApplyMigrations(app);
 }
 
-app.UseMiddleware<CustomMiddleware>(); 
+app.UseMiddleware<CustomMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -89,14 +90,17 @@ app.Run();
 
 public class CustomMiddleware
 {
-    public readonly RequestDelegate _next;
-    public readonly AppInfoService _appInfoService;
+    private readonly RequestDelegate _next;
+    private readonly AppInfoService _appInfoService;
+    private readonly RequestAuditService _requestAuditService;
 
-    public CustomMiddleware(RequestDelegate next, AppInfoService appInfoService)
+    public CustomMiddleware(RequestDelegate next, AppInfoService appInfoService, RequestAuditService requestAuditService)
     {
         _next = next;
         _appInfoService = appInfoService;
+        _requestAuditService = requestAuditService;
     }
+
     static string StatusColor(string method)
     {
         if (method == "GET")
@@ -108,21 +112,49 @@ public class CustomMiddleware
         else
             return "Yellow";
     }
+    static int LogWriteHelper(HttpContext http) //for fetching Id from Request 
+    {
+
+        var request = http.Request;
+        string value = request.Path.Value;
+        int id = 0;
+        int multiplier = 1;
+
+        for (int i = value.Length - 1; i >= 0; i--)
+        {
+            char c = value[i];
+
+            if (char.IsDigit(c))
+            {
+                id += (c - '0') * multiplier;
+                multiplier *= 10;
+            }
+            else
+                break;
+        }
+        return id;
+    }
 
     public async Task Invoke(HttpContext context)
     {
         DateTime startTime = DateTime.Now;
-        
+
         context.Response.Headers["X-App-Name"] = _appInfoService.GetAppName();
         context.Response.Headers["X-App-Version"] = _appInfoService.GetVersion();
-        
+
         Console.WriteLine("🔀 Middleware Begins");
+
         await _next(context);
 
         var response = context.Response;
         var request = context.Request;
 
         var host = request.Headers.FirstOrDefault(h => h.Key == "Host").Value;
+
+        int id = LogWriteHelper(context);
+
+        if(request.Method == "GET" && id!=0)
+        _requestAuditService.LogWrite("Request", id);
 
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine($"Time Stamp : {(startTime)} \n");
@@ -133,7 +165,7 @@ public class CustomMiddleware
         if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor))
             Console.ForegroundColor = parsedColor;
         else
-            Console.ForegroundColor = ConsoleColor.Gray; // Fallback color
+            Console.ForegroundColor = ConsoleColor.Gray;
 
         Console.WriteLine($"Method: {request.Method}");
         Console.WriteLine($"Endpoint: {host}" + $"{request.Path.Value}");

@@ -4,11 +4,9 @@ namespace Test_API.Services
 {
     public class RequestAuditService
     {
-        private readonly ILogger<RequestAuditService> _logger;
 
-        public RequestAuditService(ILogger<RequestAuditService> logger)
+        public RequestAuditService()
         {
-            _logger = logger;
         }
 
         public void LogWrite(string ResourceType , int Id )
