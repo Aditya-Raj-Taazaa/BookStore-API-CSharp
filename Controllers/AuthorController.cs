@@ -1,97 +1,79 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Diagnostics;
 using Test_API.Services;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Test_API.Controllers
 {
-
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class LoggerResourceFilter : Attribute, IResourceFilter
-    {
-        public void OnResourceExecuting(ResourceExecutingContext context)
-        {
-            Console.WriteLine(" ➡️ Request is Starting ➡️");
-        }
-
-        public void OnResourceExecuted(ResourceExecutedContext context)
-        {
-            Console.WriteLine(" ✅ Request is Completed ✅");
-        }
-        
-    }
-
-
     [ApiController]
     [Route("api/Authors")]
-    
     public class AuthorController : ControllerBase
     {
-        private readonly BookdbContext _context;
+        private readonly AuthorService _authorService;
         private readonly ILogger<AuthorController> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly FormatterService _formatterService;
 
-        public AuthorController(BookdbContext context, ILogger<AuthorController> logger, IConfiguration configuration, FormatterService formatter)
+        public AuthorController(AuthorService authorService, ILogger<AuthorController> logger)
         {
-            _context = context;
+            _authorService = authorService;
             _logger = logger;
-            _configuration = configuration;
-            _formatterService = formatter;
         }
 
-        [HttpGet(Name = "GetUserDetails")]
-        [LoggerResourceFilter]
-        public async Task<IEnumerable<Author>> Get()
+        [HttpGet(Name = "GetAuthors")]
+        public async Task<IActionResult> Get()
         {
-            return await _context.Authors.ToListAsync();
+            try
+            {
+                var authors = await _authorService.ListAsync();
+                return Ok(authors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching authors.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<Author>> Post(Author author)
+        public async Task<IActionResult> Post(Author author)
         {
-            author.Bio = _formatterService.BioFormat(author.Bio);
-            _context.Authors.Add(author);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = author.Id }, author);
+            try
+            {
+                var result = await _authorService.Post(author);
+                return CreatedAtAction(nameof(GetById), new { id = author.Id }, result.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating an author.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Author author)
         {
-            if (id != author.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(author).State = EntityState.Modified;
             try
             {
-                if (!AuthorExists(id))
+                var result = await _authorService.UpdateAuthor(id, author);
+
+                if (result.Result is BadRequestResult)
                 {
-                    return NotFound();
+                    return BadRequest("The provided ID does not match the author ID.");
+                }
+                if (result.Result is NotFoundResult)
+                {
+                    return NotFound("The author with the specified ID was not found.");
+                }
+                if (result.Result is ConflictResult)
+                {
+                    return Conflict("A concurrency issue occurred while updating the author.");
                 }
 
-                await _context.SaveChangesAsync();
+                return Ok(result.Value);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "An error occurred while updating the author.");
+                return StatusCode(500, "Internal server error");
             }
-            return Ok();
-        }
-
-        private bool AuthorExists(int id)
-        {
-            //return _context.Books.Any(e => e.Id == id);
-            var Author = _context.Authors.Find(id);
-            return Author != null;
         }
 
         [HttpDelete("{id}")]
@@ -99,55 +81,52 @@ namespace Test_API.Controllers
         {
             try
             {
-                var author = await _context.Authors.FindAsync(id);
-                if (author == null)
+                var result = await _authorService.DeleteAuthor(id);
+
+                if (result is NotFoundResult)
                 {
-                    return NotFound();
+                    return NotFound($"The author with ID {id} was not found.");
                 }
 
-                _context.Authors.Remove(author);
-                await _context.SaveChangesAsync();
-
-                return StatusCode(204);
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting User Details");
+                _logger.LogError(ex, "An error occurred while deleting the author.");
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get_By_Id(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
-                var author = await _context.Authors.FindAsync(id);
+                var author = await _authorService.FindById(id);
                 if (author == null)
                 {
-                    return NotFound();
+                    return NotFound($"The author with ID {id} was not found.");
                 }
                 return Ok(author);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting User details with {id}");
+                _logger.LogError(ex, $"An error occurred while fetching the author with ID {id}.");
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpGet("count")]
-        
         public async Task<IActionResult> Count_Authors()
         {
             try
             {
-                var count = await _context.Authors.CountAsync();
-                return Ok(count);
+                var count = await _authorService.ListAsync();
+                return Ok(count.Count());
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while counting Authors.");
+                _logger.LogError(ex, "An error occurred while counting authors.");
                 return StatusCode(500, "Internal server error");
             }
         }

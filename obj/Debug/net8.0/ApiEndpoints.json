@@ -195,18 +195,8 @@
   },
   {
     "ContainingType": "Test_API.Controllers.BookController",
-    "Method": "Count_Books",
-    "RelativePath": "api/Books/count",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Test_API.Controllers.BookController",
     "Method": "GetBook",
-    "RelativePath": "api/Books/v2/{id}",
+    "RelativePath": "api/Books/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -217,6 +207,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Test_API.Controllers.BookController",
+    "Method": "Count_Books",
+    "RelativePath": "api/Books/count",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]

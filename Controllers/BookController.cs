@@ -2,12 +2,9 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authorization;
 using Test_API.ActionFilters;
-using Test_API.ExceptionFilters;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Test_API.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Test_API.Controllers
 {
@@ -19,13 +16,15 @@ namespace Test_API.Controllers
         private readonly ILogger<BookController> _logger;
         public readonly AppInfoService _appInfoService;
         private readonly RequestAuditService _requestAuditService;
+        public readonly BookService _bookService;
 
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, RequestAuditService requestAuditService) // Change parameter type to BookdbContext
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, RequestAuditService requestAuditService, BookService bookService) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
             _appInfoService = appInfoService;
             _requestAuditService = requestAuditService;
+            _bookService = bookService;
         }
        
         
@@ -33,49 +32,54 @@ namespace Test_API.Controllers
         [ExecutionTimeFilter]
         [HttpGet(Name = "GetBookDetails")]
         
-        public async Task<IEnumerable<Book>> Get()
+        public async Task<IActionResult> Get()
         {
-            Request.Headers["X-App-Name"] = _appInfoService.GetAppName();
-            Response.Headers["X-App-Version"] =_appInfoService.GetVersion();
-            return await _context.Books.ToListAsync();
+             try
+            {
+                var books = await _bookService.ListAsync();
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching book details.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         
         [HttpPost]
-        public async Task<ActionResult<Book>> Post(Book Book)
+        public async Task<ActionResult<Book>> Post(Book book)
         {
-            _context.Books.Add(Book);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = Book.Id }, Book);
+            try{
+                return await _bookService.Post(book);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex,"Error on Creating Book");
+                return StatusCode(500,"Internal Server Error");
+            }
+            
         }
 
 
         [HttpPut("{id}")]
-        
-        public async Task<IActionResult> Put(int id, Book Book)
+        public async Task<IActionResult> Put(int id, Book book)
         {
-            try
-            {
-                if (id != Book.Id)
-                {
-                    return BadRequest();
-                }
+            var result = await _bookService.UpdateBook(id, book);
 
-                _context.Entry(Book).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
+            if (result.Result is BadRequestResult)
             {
-                if (!BookExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest("The provided ID does not match the book ID.");
             }
-            return Ok(Book);
+            if (result.Result is NotFoundResult)
+            {
+                return NotFound("The book with the specified ID was not found.");
+            }
+            if (result.Result is ConflictResult)
+            {
+                return Conflict("A concurrency issue occurred while updating the book.");
+            }
+            return Ok(result.Value);
         }
 
         [HttpDelete("{id}")]
@@ -83,16 +87,14 @@ namespace Test_API.Controllers
         {
             try
             {
-                var Book = await _context.Books.FindAsync(id);
-                if (Book == null)
+                var Book = await _bookService.DeleteBook(id);
+
+                if (Book is NotFoundResult)
                 {
-                    return NotFound();
+                    return NotFound($"The Book not Found By ID : {id}");
                 }
                 _requestAuditService.LogWrite("Book",id);
-                _context.Books.Remove(Book);
-                await _context.SaveChangesAsync();
-
-                return StatusCode(204);
+                return Book;
             }
             catch (Exception ex)
             {

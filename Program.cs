@@ -26,12 +26,15 @@ Services.AddControllers(options =>
 Services.AddEndpointsApiExplorer();
 Services.AddSwaggerGen();
 
-Services.AddTransient<DataSeeder>();
+
 
 Services.AddSingleton<AppInfoService>();
 Services.AddSingleton<RequestAuditService>();
-Services.AddTransient<FormatterService>();
 
+Services.AddTransient<FormatterService>();
+Services.AddTransient<DataSeeder>();
+Services.AddTransient<BookService>();
+Services.AddTransient<AuthorService>();
 
 
 Services.AddDbContextPool<BookdbContext>(options =>

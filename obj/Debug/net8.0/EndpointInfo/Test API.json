@@ -332,9 +332,7 @@
             "description": "OK"
           }
         }
-      }
-    },
-    "/api/Books/v2/{id}": {
+      },
       "get": {
         "tags": [
           "Book"
