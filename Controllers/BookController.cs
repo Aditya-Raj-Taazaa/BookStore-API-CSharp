@@ -104,7 +104,7 @@ namespace Test_API.Controllers
         
         
         [ExecutionTimeFilter]
-        [HttpGet("v2/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
         {
             var book = await _context.Books

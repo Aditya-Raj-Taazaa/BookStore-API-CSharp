@@ -1,16 +1,4 @@
-﻿//using Microsoft.Extensions.Configuration;
-
-//namespace Test_API.Services
-//{
-//    public class AppInfoService
-//    {
-//        public string? GetAppName = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("Build")["App_Name"];
-
-//        public string? version = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("Build")["Version"];
-//    }
-//}
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace Test_API.Services
 {
