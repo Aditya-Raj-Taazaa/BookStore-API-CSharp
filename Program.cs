@@ -1,16 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
 using Test_API.Middleware;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Test_API.Data;
-using Microsoft.Extensions.Options;
 using Test_API.ExceptionFilters;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Test_API.Services;
-using System.Data;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 
 var builder = WebApplication.CreateBuilder(args);
