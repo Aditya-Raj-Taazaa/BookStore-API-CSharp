@@ -17,7 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 var services = builder.Services;
 
-services.AddMemoryCache();
 // Add services to the container
 services.AddControllers(options =>
 {
