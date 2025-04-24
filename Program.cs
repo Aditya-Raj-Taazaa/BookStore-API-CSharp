@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
+using Test_API.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Test_API.Data;
@@ -90,98 +91,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
-
-public class CustomMiddleware
-{
-    private readonly RequestDelegate _next;
-    private readonly AppInfoService _appInfoService;
-    private readonly RequestAuditService _requestAuditService;
-
-    public CustomMiddleware(RequestDelegate next, AppInfoService appInfoService, RequestAuditService requestAuditService)
-    {
-        _next = next;
-        _appInfoService = appInfoService;
-        _requestAuditService = requestAuditService;
-    }
-
-    static string StatusColor(string method)
-    {
-        if (method == "GET")
-            return "Green";
-        else if (method == "PUT")
-            return "Blue";
-        else if (method == "DELETE")
-            return "Red";
-        else
-            return "Yellow";
-    }
-    static int LogWriteHelper(HttpContext http) //for fetching Id from Request 
-    {
-
-        var request = http.Request;
-        string value = request.Path.Value;
-        int id = 0;
-        int multiplier = 1;
-
-        for (int i = value.Length - 1; i >= 0; i--)
-        {
-            char c = value[i];
-
-            if (char.IsDigit(c))
-            {
-                id += (c - '0') * multiplier;
-                multiplier *= 10;
-            }
-            else
-                break;
-        }
-        return id;
-    }
-
-    public async Task Invoke(HttpContext context)
-    {
-        DateTime startTime = DateTime.Now;
-
-        context.Response.Headers["X-App-Name"] = _appInfoService.GetAppName();
-        context.Response.Headers["X-App-Version"] = _appInfoService.GetVersion();
-
-        Console.WriteLine("🔀 Middleware Begins");
-
-        await _next(context);
-
-        var response = context.Response;
-        var request = context.Request;
-
-        var host = request.Headers.FirstOrDefault(h => h.Key == "Host").Value;
-
-        int id = LogWriteHelper(context);
-
-        if(request.Method == "GET" && id!=0)
-        _requestAuditService.LogWrite("Request", id);
-
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"Time Stamp : {(startTime)} \n");
-
-        string colorcode = StatusColor(request.Method);
-
-
-        if (Enum.TryParse(colorcode, true, out ConsoleColor parsedColor))
-            Console.ForegroundColor = parsedColor;
-        else
-            Console.ForegroundColor = ConsoleColor.Gray;
-
-        Console.WriteLine($"Method: {request.Method}");
-        Console.WriteLine($"Endpoint: {host}" + $"{request.Path.Value}");
-
-        Console.WriteLine($"Response Status Code: {response.StatusCode}");
-
-        Console.WriteLine($"Content Type: {response.ContentType}");
-        Console.WriteLine($"Request Body: {await new StreamReader(request.Body).ReadToEndAsync()}");
-        Console.WriteLine($"Response Body : {response.Body.ToString()}");
-        Console.WriteLine($"Request Cookies: {string.Join(", ", request.Cookies.Select(c => $"{c.Key}={c.Value}"))}");
-        Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
-        Console.ResetColor();
-    }
-}
