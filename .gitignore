@@ -1,0 +1,101 @@
+## C# Web API - Clean GitIgnore
+
+# Build results
+bin/
+obj/
+artifacts/
+*.dll
+*.exe
+*.app
+*.pdb
+*.cache
+*.log
+*.tmp
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.rsuser
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.vc.db
+*.VC.opendb
+
+# Rider
+.idea/
+*.sln.iml
+
+# ASP.NET publish output
+publish/
+*.pubxml
+*.publishproj
+*.Publish.xml
+
+# Logs
+logs/
+*.log
+
+# Coverage and test results
+TestResults/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+
+# MSTest/NUnit
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# Scaffolding
+ScaffoldingReadMe.txt
+
+# Node.js (if using frontend or tools like webpack)
+node_modules/
+
+# VS Code (optional to keep settings files)
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# Paket
+.paket/
+paket-files/
+
+# Backup and temp
+~$*
+*.bak
+*.tmp
+*.dbmdl
+
+# SQLite / SQL Server local files
+*.mdf
+*.ldf
+
+# Secrets (adjust if using secrets.json)
+secrets.json
+.env
+
+# Others
+*.nupkg
+*.snupkg
+*.tgz
+*.jfm
+*.tss
