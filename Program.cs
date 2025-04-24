@@ -14,30 +14,32 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
-var Services = builder.Services;
+var services = builder.Services;
 
+services.AddMemoryCache();
 // Add services to the container
-Services.AddControllers(options =>
+services.AddControllers(options =>
 {
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
 
-Services.AddEndpointsApiExplorer();
-Services.AddSwaggerGen();
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
 
 
 
-Services.AddSingleton<AppInfoService>();
-Services.AddSingleton<RequestAuditService>();
+services.AddSingleton<AppInfoService>();
+services.AddSingleton<RequestAuditService>();
 
-Services.AddTransient<FormatterService>();
-Services.AddTransient<DataSeeder>();
-Services.AddTransient<BookService>();
-Services.AddTransient<AuthorService>();
+services.AddTransient<FormatterService>();
+services.AddTransient<DataSeeder>();
+services.AddTransient<BookService>();
+services.AddTransient<AuthorService>();
 
 
-Services.AddDbContextPool<BookdbContext>(options =>
+
+services.AddDbContextPool<BookdbContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
 void ApplyMigrations(WebApplication app)
@@ -65,12 +67,12 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var seeder = services.GetRequiredService<DataSeeder>();
+    var Services = scope.ServiceProvider;
+    var seeder = Services.GetRequiredService<DataSeeder>();
     await seeder.SeedAsync();
 }
 
-// Configure the HTTP request pipeline.
+// HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

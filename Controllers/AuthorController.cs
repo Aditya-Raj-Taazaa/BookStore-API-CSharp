@@ -117,7 +117,7 @@ namespace Test_API.Controllers
         }
 
         [HttpGet("count")]
-        public async Task<IActionResult> Count_Authors()
+        public async Task<IActionResult> CountAuthors()
         {
             try
             {

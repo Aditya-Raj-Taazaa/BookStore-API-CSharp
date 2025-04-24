@@ -131,7 +131,7 @@ namespace Test_API.Controllers
 
         [ExecutionTimeFilter]
         [HttpGet("count")]
-        public async Task<IActionResult> Count_Books()
+        public async Task<IActionResult> CountBooks()
         {
             try
             {
