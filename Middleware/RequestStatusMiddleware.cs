@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using System.Text;
 using Test_API.Services;
 
 namespace Test_API.Middleware

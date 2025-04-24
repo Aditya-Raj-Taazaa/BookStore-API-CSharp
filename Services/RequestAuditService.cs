@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
+﻿
 namespace Test_API.Services
 {
     public class RequestAuditService

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Test_API.Models
+﻿namespace Test_API.Models
 {
     public class Author
     {
