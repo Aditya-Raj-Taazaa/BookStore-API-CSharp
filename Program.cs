@@ -82,7 +82,7 @@ if (app.Environment.IsDevelopment())
     ApplyMigrations(app);
 }
 
-app.UseMiddleware<CustomMiddleware>();
+app.UseMiddleware<RequestStatusMiddleware>();
 
 app.UseHttpsRedirection();
 

@@ -4,13 +4,13 @@ using Test_API.Services;
 
 namespace Test_API.Middleware
 {
-    public class CustomMiddleware
+    public class RequestStatusMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly AppInfoService _appInfoService;
         private readonly RequestAuditService _requestAuditService;
 
-        public CustomMiddleware(RequestDelegate next, AppInfoService appInfoService, RequestAuditService requestAuditService)
+        public RequestStatusMiddleware(RequestDelegate next, AppInfoService appInfoService, RequestAuditService requestAuditService)
         {
             _next = next;
             _appInfoService = appInfoService;
