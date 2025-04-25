@@ -1,78 +1,24 @@
-﻿
-using Test_API.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Test_API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Test_API.Services
 {
-    public class AuthorService(BookdbContext context, FormatterService formatterService)
+    public class AuthorService : BaseService<Author>
     {
-        private readonly BookdbContext _context = context;
-        private readonly FormatterService _formatterService = formatterService;
+        private readonly FormatterService _formatterService;
 
-        public async Task<IEnumerable<Author>> ListAsync()
+        public AuthorService(BookdbContext context, FormatterService formatterService)
+            : base(context)
         {
-            return await _context.Authors.ToListAsync();
+            _formatterService = formatterService;
         }
 
-        public async Task<ActionResult<Author>> Post(Author Author)
+        public async Task<ActionResult<Author>> CreateAuthorAsync(Author author)
         {
-            Author.Bio = _formatterService.BioFormat(Author.Bio);
-            _context.Authors.Add(Author);
-            await _context.SaveChangesAsync();
-            return new ActionResult<Author>(Author);
-        }
-
-        public async Task<ActionResult<Author>> UpdateAuthor(int id, Author author)
-        {
-            if (id != author.Id)
-            {
-                return new BadRequestResult();
-            }
-
-            var existingAuthor = await FindById(id);
-            if (existingAuthor == null)
-            {
-                return new NotFoundResult();
-            }
-
-            _context.Entry(author).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync(); // Ensure this is awaited
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                Console.WriteLine("Concurrency exception: " + ex.Message);
-                return new ConflictResult();
-            }
-
-            return new ActionResult<Author>(author);
-            
-        }
-
-        public async Task<IActionResult> DeleteAuthor(int id)
-        {
-            var AuthorToDelete = await FindById(id);
-            if(AuthorToDelete == null)
-            {
-                return new NotFoundResult();
-            }
-
-            _context.Authors.Remove(AuthorToDelete);
-            await _context.SaveChangesAsync();
-            return new OkObjectResult(AuthorToDelete);  
-        }
-
-        private async Task<bool> AuthorExists(int id)
-        {
-            return await _context.Authors.AnyAsync(b => b.Id == id);
-        }
-
-        public async Task<Author?> FindById(int id)
-        {
-            return await _context.Authors.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+            Console.WriteLine($"Original Bio: {author.Bio}");
+            author.Bio = _formatterService.BioFormat(author.Bio);
+            Console.WriteLine($"Formatted Bio: {author.Bio}");
+            return await CreateAsync(author);
         }
     }
 }

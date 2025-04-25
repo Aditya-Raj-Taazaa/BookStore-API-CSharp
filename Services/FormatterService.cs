@@ -1,5 +1,4 @@
-﻿
-namespace Test_API.Services
+﻿namespace Test_API.Services
 {
     public class FormatterService
     {
@@ -7,27 +6,10 @@ namespace Test_API.Services
         {
             if (string.IsNullOrWhiteSpace(input))
                 return string.Empty;
-
-            input = input.Trim().ToLower();
-            char[] chars = input.ToCharArray();
-            bool capitalizeNext = true;
-
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (char.IsWhiteSpace(chars[i]))
-                {
-                    capitalizeNext = true;
-                }
-                else if (capitalizeNext && char.IsLetter(chars[i]))
-                {
-                    chars[i] = char.ToUpper(chars[i]);
-                    capitalizeNext = false;
-                }
-            }
-
-            string formatted = new string(chars);
-            Console.WriteLine($"Formatter: {formatted} ✍️");
-            return formatted;
+                
+            return string.Join(" ", input.Split(' ')
+                .Where(word => !string.IsNullOrWhiteSpace(word))
+                .Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLower()));
         }
     }
 }

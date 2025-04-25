@@ -37,7 +37,7 @@ namespace Test_API.Controllers
         {
             try
             {
-                var result = await _authorService.Post(author);
+                var result = await _authorService.CreateAsync(author);
                 return CreatedAtAction(nameof(GetById), new { id = author.Id }, result.Value);
             }
             catch (Exception ex)
@@ -52,7 +52,7 @@ namespace Test_API.Controllers
         {
             try
             {
-                var result = await _authorService.UpdateAuthor(id, author);
+                var result = await _authorService.UpdateAsync(id, author);
 
                 if (result.Result is BadRequestResult)
                 {
@@ -81,7 +81,7 @@ namespace Test_API.Controllers
         {
             try
             {
-                var result = await _authorService.DeleteAuthor(id);
+                var result = await _authorService.DeleteAsync(id);
 
                 if (result is NotFoundResult)
                 {
@@ -102,7 +102,7 @@ namespace Test_API.Controllers
         {
             try
             {
-                var author = await _authorService.FindById(id);
+                var author = await _authorService.FindByIdAsync(id);
                 if (author == null)
                 {
                     return NotFound($"The author with ID {id} was not found.");
