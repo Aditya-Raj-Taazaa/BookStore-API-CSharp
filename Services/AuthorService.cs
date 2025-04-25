@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Test_API.Services
 {
-    public class AuthorService(BookdbContext context)
+    public class AuthorService(BookdbContext context, FormatterService formatterService)
     {
         private readonly BookdbContext _context = context;
+        private readonly FormatterService _formatterService = formatterService;
 
         public async Task<IEnumerable<Author>> ListAsync()
         {
@@ -16,6 +17,7 @@ namespace Test_API.Services
 
         public async Task<ActionResult<Author>> Post(Author Author)
         {
+            Author.Bio = _formatterService.BioFormat(Author.Bio);
             _context.Authors.Add(Author);
             await _context.SaveChangesAsync();
             return new ActionResult<Author>(Author);

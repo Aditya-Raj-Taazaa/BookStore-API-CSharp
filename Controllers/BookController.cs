@@ -14,15 +14,15 @@ namespace Test_API.Controllers
         private readonly BookdbContext _context; 
         private readonly ILogger<BookController> _logger;
         public readonly AppInfoService _appInfoService;
-        private readonly RequestAuditService _requestAuditService;
+        
         public readonly BookService _bookService;
 
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, RequestAuditService requestAuditService, BookService bookService) // Change parameter type to BookdbContext
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
             _appInfoService = appInfoService;
-            _requestAuditService = requestAuditService;
+            
             _bookService = bookService;
         }
        
@@ -92,7 +92,6 @@ namespace Test_API.Controllers
                 {
                     return NotFound($"The Book not Found By ID : {id}");
                 }
-                _requestAuditService.LogWrite("Book",id);
                 return Book;
             }
             catch (Exception ex)
@@ -122,7 +121,6 @@ namespace Test_API.Controllers
                         .FirstOrDefault()
                 })
                 .FirstOrDefaultAsync();
-            _requestAuditService.LogWrite("Book", id);
             if (book == null) return NotFound();
             
             return Ok(book);
