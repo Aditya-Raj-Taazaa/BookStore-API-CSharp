@@ -41,7 +41,7 @@ void ApplyMigrations(WebApplication app)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<BookdbContext>();
 
-        // Check and apply pending migrations
+        
         var pendingMigrations = dbContext.Database.GetPendingMigrations();
         if (pendingMigrations.Any())
         {

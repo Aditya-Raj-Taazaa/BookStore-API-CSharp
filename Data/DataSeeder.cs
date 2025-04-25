@@ -27,8 +27,7 @@ namespace Test_API.Data
             {
                 Name = "J.K Rowling",
                 Bio = "Fantasy Genre Writer from England"
-            },
-            
+            }, 
         };
 
             // Add authors to database
