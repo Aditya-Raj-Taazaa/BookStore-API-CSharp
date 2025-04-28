@@ -13,16 +13,12 @@ namespace Test_API.Controllers
     {
         private readonly BookdbContext _context; 
         private readonly ILogger<BookController> _logger;
-        public readonly AppInfoService _appInfoService;
-        
         public readonly BookService _bookService;
 
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService) // Change parameter type to BookdbContext
+        public BookController(BookdbContext context, ILogger<BookController> logger, BookService bookService) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
-            _appInfoService = appInfoService;
-            
             _bookService = bookService;
         }
        

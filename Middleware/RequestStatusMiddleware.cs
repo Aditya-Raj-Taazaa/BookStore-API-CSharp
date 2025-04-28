@@ -1,3 +1,4 @@
+using Azure;
 using Test_API.Services;
 
 namespace Test_API.Middleware
@@ -52,7 +53,7 @@ namespace Test_API.Middleware
 
             context.Response.Headers["X-App-Name"] = _appInfoService.GetAppName();
             context.Response.Headers["X-App-Version"] = _appInfoService.GetVersion();
-
+            context.Response.Headers["Content-Size"] = context.Response.ContentLength?.ToString() ?? "0";
             Console.WriteLine("🔀 Middleware Begins");
 
             await _next(context);
