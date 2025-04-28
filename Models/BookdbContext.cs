@@ -10,6 +10,7 @@ namespace Test_API.Models
 
         public DbSet<Book> Books { get; set; }
         public DbSet<Author> Authors { get; set; }
+        public DbSet<Location> Locations {get; set;} 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

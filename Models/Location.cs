@@ -10,5 +10,6 @@ namespace Test_API.Models
         public required int Price {get; set;}
         public required string ShortDescription {get; set;}
         public required string LongDescription {get; set;}
+        // public required string Image {get; set;}
     }
 }

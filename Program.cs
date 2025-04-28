@@ -29,6 +29,7 @@ services.AddTransient<FormatterService>();
 services.AddTransient<DataSeeder>();
 services.AddTransient<BookService>();
 services.AddTransient<AuthorService>();
+services.AddTransient<LocationService>(); 
 
 
 
