@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
 using Test_API.ActionFilters;
 using Test_API.Services;
+using Azure;
 
 namespace Test_API.Controllers
 {
@@ -17,15 +18,25 @@ namespace Test_API.Controllers
         
         public readonly BookService _bookService;
 
+        public delegate string ResultLogger(int number);
+
         public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
             _appInfoService = appInfoService;
-            
             _bookService = bookService;
         }
        
+       public string BookLogger(int count)
+       {
+        if(count == 0)
+        return "No Books are There";
+        else if(count == 1)
+        return "There is One Book";
+        else
+        return $"Currently There are {count} Books";
+       }
         
 
         [ExecutionTimeFilter]
@@ -133,8 +144,10 @@ namespace Test_API.Controllers
             try
             {
                 var count = await _context.Books.CountAsync();
+                ResultLogger logger = BookLogger;
+                var result = logger(count);
                 Console.WriteLine(count);
-                return Ok(count);
+                return Ok(result);
             }
             catch (Exception ex)
             {
