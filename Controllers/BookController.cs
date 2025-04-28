@@ -18,7 +18,7 @@ namespace Test_API.Controllers
         
         public readonly BookService _bookService;
 
-        public delegate string ResultLogger(int number);
+        public delegate string CountMessage(int number);
 
         public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService) // Change parameter type to BookdbContext
         {
@@ -28,7 +28,7 @@ namespace Test_API.Controllers
             _bookService = bookService;
         }
        
-       public string BookLogger(int count)
+       public string BookCountMessage(int count)
        {
         if(count == 0)
         return "No Books are There";
@@ -144,10 +144,10 @@ namespace Test_API.Controllers
             try
             {
                 var count = await _context.Books.CountAsync();
-                ResultLogger logger = BookLogger;
-                var result = logger(count);
+                 CountMessage message = BookCountMessage;
+                var countMessage = message(count);
                 Console.WriteLine(count);
-                return Ok(result);
+                return Ok(countMessage);
             }
             catch (Exception ex)
             {
