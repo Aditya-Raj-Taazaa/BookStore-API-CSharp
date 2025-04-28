@@ -2,15 +2,18 @@
 using Test_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Azure;
 namespace Test_API.Services
 {
     public class BookService(BookdbContext context)
     {
         private readonly BookdbContext _context = context;
 
-        public async Task<IEnumerable<Book>> ListAsync()
+        public async Task<List<Book>> ListAsync(int page,int pageSize)
         {
-            return await _context.Books.ToListAsync();
+            return await _context.Books.Skip((page - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .ToListAsync();
         }
 
         public async Task<ActionResult<Book>> Post(Book Book)

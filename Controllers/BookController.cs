@@ -2,9 +2,11 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Test_API.Models;
+using Test_API.Models.DTOs;
 using Test_API.ActionFilters;
 using Test_API.Services;
 using Azure;
+using AutoMapper;
 
 namespace Test_API.Controllers
 {
@@ -15,43 +17,35 @@ namespace Test_API.Controllers
         private readonly BookdbContext _context; 
         private readonly ILogger<BookController> _logger;
         public readonly AppInfoService _appInfoService;
-        
         public readonly BookService _bookService;
-
-        public delegate string CountMessage(int number);
-
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService) // Change parameter type to BookdbContext
+        public readonly IMapper _mapper;
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService, IMapper mapper) // Change parameter type to BookdbContext
         {
             _context = context;
             _logger = logger;
             _appInfoService = appInfoService;
             _bookService = bookService;
+            _mapper = mapper;
         }
        
-       public string BookCountMessage(int count)
-       {
-        if(count == 0)
-        return "No Books are There";
-        else if(count == 1)
-        return "There is One Book";
-        else
-        return $"Currently There are {count} Books";
-       }
-        
-
         [ExecutionTimeFilter]
         [HttpGet(Name = "GetBookDetails")]
-        
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] int page = 1, int pagesize = 1)
         {
-             try
+            if (page <= 0 || pagesize <= 0)
+                return BadRequest("Page and pagesize must be positive integers.");
+
+            try
             {
-                var books = await _bookService.ListAsync();
-                return Ok(books);
+                var books = await _bookService.ListAsync(page, pagesize);
+
+                var bookDTOs = _mapper.Map<IEnumerable<GetBookDTO>>(books);
+
+                return Ok(bookDTOs);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching book details.");
+                _logger.LogError(ex, "An error occurred while fetching books.");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -133,7 +127,6 @@ namespace Test_API.Controllers
                 })
                 .FirstOrDefaultAsync();
             if (book == null) return NotFound();
-            
             return Ok(book);
         }
 
@@ -143,11 +136,9 @@ namespace Test_API.Controllers
         {
             try
             {
-                var count = await _context.Books.CountAsync();
-                 CountMessage message = BookCountMessage;
-                var countMessage = message(count);
+                var count = await _context.Books.CountAsync();  
                 Console.WriteLine(count);
-                return Ok(countMessage);
+                return Ok(count);
             }
             catch (Exception ex)
             {

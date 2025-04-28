@@ -4,6 +4,7 @@ using Test_API.Middleware;
 using Test_API.Data;
 using Test_API.ExceptionFilters;
 using Test_API.Services;
+using Test_API.Models.DTOs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,7 @@ services.AddControllers(options =>
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
-
+services.AddAutoMapper(typeof(MappingProfile));
 
 
 services.AddSingleton<AppInfoService>();

@@ -10,9 +10,17 @@ namespace Test_API.Services
         private readonly BookdbContext _context = context;
         private readonly FormatterService _formatterService = formatterService;
 
-        public async Task<IEnumerable<Author>> ListAsync()
+        public async Task<int> CountAsync()
         {
-            return await _context.Authors.ToListAsync();
+            return await _context.Authors.CountAsync();
+        }
+
+        public async Task<IEnumerable<Author>> ListAsync(int page, int pageSize)
+        {
+            return await _context.Authors
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<ActionResult<Author>> Post(Author Author)

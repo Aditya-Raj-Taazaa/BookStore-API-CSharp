@@ -18,12 +18,25 @@ namespace Test_API.Controllers
         }
 
         [HttpGet(Name = "GetAuthors")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var authors = await _authorService.ListAsync();
-                return Ok(authors);
+                if (page <= 0 || pageSize <= 0)
+                {
+                    return BadRequest("Page and pageSize must be greater than 0.");
+                }
+
+                var authors = await _authorService.ListAsync(page, pageSize);
+                var totalAuthors = await _authorService.CountAsync();
+
+                return Ok(new
+                {
+                    TotalCount = totalAuthors,
+                    Page = page,
+                    PageSize = pageSize,
+                    Data = authors
+                });
             }
             catch (Exception ex)
             {
@@ -121,8 +134,8 @@ namespace Test_API.Controllers
         {
             try
             {
-                var count = await _authorService.ListAsync();
-                return Ok(count.Count());
+                var count = await _authorService.CountAsync();
+                return Ok(count);
             }
             catch (Exception ex)
             {
