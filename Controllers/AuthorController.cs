@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Test_API.Models;
 using Test_API.Services;
+using Test_API.Interfaces;
+using Test_API.Models.DTOs;
 
 namespace Test_API.Controllers
 {
@@ -8,13 +11,15 @@ namespace Test_API.Controllers
     [Route("api/Authors")]
     public class AuthorController : ControllerBase
     {
-        private readonly AuthorService _authorService;
+        private readonly IAuthorService _authorService;
         private readonly ILogger<AuthorController> _logger;
+        private readonly IMapper _mapper;
 
-        public AuthorController(AuthorService authorService, ILogger<AuthorController> logger)
+        public AuthorController(AuthorService authorService, ILogger<AuthorController> logger, IMapper mapper)
         {
             _authorService = authorService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet(Name = "GetAuthors")]
@@ -26,16 +31,17 @@ namespace Test_API.Controllers
                 {
                     return BadRequest("Page and pageSize must be greater than 0.");
                 }
-
+                
                 var authors = await _authorService.ListAsync(page, pageSize);
                 var totalAuthors = await _authorService.CountAsync();
+                var authorDTO = _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
 
                 return Ok(new
                 {
                     TotalCount = totalAuthors,
                     Page = page,
                     PageSize = pageSize,
-                    Data = authors
+                    Data = authorDTO
                 });
             }
             catch (Exception ex)
@@ -46,11 +52,14 @@ namespace Test_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Author author)
+        public async Task<IActionResult> Post(CreateAuthorDTO createAuthorDTO)
         {
             try
             {
+                var author = _mapper.Map<Author>(createAuthorDTO);
                 var result = await _authorService.Post(author);
+                var authorDTO = _mapper.Map<AuthorDTO>(result);
+                
                 return CreatedAtAction(nameof(GetById), new { id = author.Id }, result.Value);
             }
             catch (Exception ex)
@@ -61,11 +70,20 @@ namespace Test_API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Author author)
+        public async Task<IActionResult> Put(int id, UpdateAuthorDTO updateAuthorDTO)
         {
             try
             {
-                var result = await _authorService.UpdateAuthor(id, author);
+                var existingAuthor = await _authorService.FindById(id);
+                if (existingAuthor == null)
+                {
+                    return NotFound($"The author with ID {id} was not found.");
+                }
+
+                _mapper.Map(updateAuthorDTO, existingAuthor);
+
+                var result = await _authorService.UpdateAuthor(id, existingAuthor);
+
 
                 if (result.Result is BadRequestResult)
                 {
@@ -80,7 +98,8 @@ namespace Test_API.Controllers
                     return Conflict("A concurrency issue occurred while updating the author.");
                 }
 
-                return Ok(result.Value);
+                var authorDTO = _mapper.Map<AuthorDTO>(result.Value);
+                return Ok(authorDTO);
             }
             catch (Exception ex)
             {
@@ -120,7 +139,9 @@ namespace Test_API.Controllers
                 {
                     return NotFound($"The author with ID {id} was not found.");
                 }
-                return Ok(author);
+
+                var authorDTO = _mapper.Map<GetAuthorDTO>(author);
+                return Ok(authorDTO);
             }
             catch (Exception ex)
             {

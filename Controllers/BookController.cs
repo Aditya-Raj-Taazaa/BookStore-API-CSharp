@@ -5,7 +5,7 @@ using Test_API.Models;
 using Test_API.Models.DTOs;
 using Test_API.ActionFilters;
 using Test_API.Services;
-using Azure;
+using Test_API.Interfaces;
 using AutoMapper;
 
 namespace Test_API.Controllers
@@ -17,7 +17,7 @@ namespace Test_API.Controllers
         private readonly BookdbContext _context; 
         private readonly ILogger<BookController> _logger;
         public readonly AppInfoService _appInfoService;
-        public readonly BookService _bookService;
+        public readonly IBookService _bookService;
         public readonly IMapper _mapper;
         public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, BookService bookService, IMapper mapper) // Change parameter type to BookdbContext
         {
@@ -75,9 +75,16 @@ namespace Test_API.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Book book)
+        public async Task<IActionResult> Put(int id, UpdateBookDTO updateBookDTO)
         {
-            var result = await _bookService.UpdateBook(id, book);
+            var existingBook = await _bookService.FindById(id);
+            if(existingBook == null)
+            {
+                return NotFound($"Book by the Id {id} not Found");
+            }
+            _mapper.Map(updateBookDTO,existingBook);
+            
+            var result = await _bookService.UpdateBook(id, existingBook);
 
             if (result.Result is BadRequestResult)
             {
@@ -120,22 +127,22 @@ namespace Test_API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
         {
-            var book = await _context.Books
-                .Where(b => b.Id == id)
-                .Select(b => new
+            try
+            {
+                var book = await _bookService.FindById(id);
+                if (book == null)
                 {
-                    b.Id,
-                    b.Title,
-                    b.Price,
-                    b.AuthorId,
-                    AuthorName = _context.Authors
-                        .Where(a => a.Id == b.AuthorId)
-                        .Select(a => a.Name)
-                        .FirstOrDefault()
-                })
-                .FirstOrDefaultAsync();
-            if (book == null) return NotFound();
-            return Ok(book);
+                    return NotFound($"The book with ID {id} was not found.");
+                }
+
+                var bookDTO = _mapper.Map<GetBookDTO>(book);
+                return Ok(bookDTO);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while fetching the book with ID {id}.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [ExecutionTimeFilter]
@@ -144,21 +151,14 @@ namespace Test_API.Controllers
         {
             try
             {
-                var count = await _context.Books.CountAsync();  
-                Console.WriteLine(count);
-                return Ok(count);
+                var count = await _bookService.ListAsync(1, int.MaxValue);
+                return Ok(count.Count);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while counting Books.");
                 return StatusCode(500, "Internal server error");
             }
-        }
-
-        private bool BookExists(int id)
-        {
-            var Book = _context.Books.Find(id);
-            return Book != null;
         }
     }
 }
