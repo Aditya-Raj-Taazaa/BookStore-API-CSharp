@@ -36,7 +36,14 @@ namespace Test_API.Controllers
             try
             {
                 var bookDTOs = await _bookService.ListAsync(page, pageSize);
-                return Ok(bookDTOs);
+                var totalBooks = bookDTOs.Count();
+                return Ok(new
+                {
+                    TotalCount = totalBooks,
+                    Page = page,
+                    PageSize = pageSize,
+                    Data = bookDTOs
+                });
             }
             catch (Exception ex)
             {
