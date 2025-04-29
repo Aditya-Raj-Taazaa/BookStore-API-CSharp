@@ -10,24 +10,41 @@ namespace Test_API.Services
     public class AuthorService : IAuthorService
     {
         private readonly BookdbContext _context;
-        private readonly FormatterService _formatterService;
         private readonly IMapper _mapper;
 
-        public AuthorService(BookdbContext context, FormatterService formatterService, IMapper mapper)
+        public AuthorService(BookdbContext context, IMapper mapper)
         {
             _context = context;
-            _formatterService = formatterService;
             _mapper = mapper;
         }
 
-        public async Task<int> CountAsync()
+        public async Task<int> CountAsync(string? name = null, string? bio = null)
         {
-            return await _context.Authors.CountAsync();
+            var query = _context.Authors.AsQueryable();
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(a => a.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrEmpty(bio))
+            {
+                query = query.Where(a => a.Bio.Contains(bio));
+            }
+
+            return await query.CountAsync();
         }
 
-        public async Task<IEnumerable<GetAuthorDTO>> ListAsync(int page, int pageSize)
+        public async Task<IEnumerable<GetAuthorDTO>> ListAsync(int page, int pageSize, string? name = null, string? bio = null)
         {
-            var authors = await _context.Authors
+            var query = _context.Authors.AsQueryable();
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(a => a.Name.Contains(name));
+
+            if (!string.IsNullOrEmpty(bio))
+                query = query.Where(a => a.Bio.Contains(bio));
+
+            var authors = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -37,7 +54,6 @@ namespace Test_API.Services
         public async Task<ActionResult<AuthorDTO>> Post(CreateAuthorDTO createAuthorDTO)
         {
             var author = _mapper.Map<Author>(createAuthorDTO);
-            author.Bio = _formatterService.BioFormat(author.Bio);
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
             var authorDTO = _mapper.Map<AuthorDTO>(author);
@@ -46,11 +62,12 @@ namespace Test_API.Services
 
         public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, UpdateAuthorDTO updateAuthorDTO)
         {
-            var existingAuthor = await FindById(id);
+            var existingAuthor = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
             if (existingAuthor == null)
             {
                 return new NotFoundResult();
             }
+
             _mapper.Map(updateAuthorDTO, existingAuthor);
             _context.Entry(existingAuthor).State = EntityState.Modified;
 
@@ -58,11 +75,11 @@ namespace Test_API.Services
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
-                Console.WriteLine("Concurrency exception: " + ex.Message);
                 return new ConflictResult();
             }
+
             var authorDTO = _mapper.Map<AuthorDTO>(existingAuthor);
             return new ActionResult<AuthorDTO>(authorDTO);
         }
@@ -74,16 +91,17 @@ namespace Test_API.Services
             {
                 return new NotFoundResult();
             }
+
             _context.Authors.Remove(authorToDelete);
             await _context.SaveChangesAsync();
-            var authorDTO = _mapper.Map<AuthorDTO>(authorToDelete);
-            return new OkObjectResult(authorDTO);
+
+            return new OkResult();
         }
 
-        public async Task<GetAuthorDTO?> FindById(int id)
+        public async Task<AuthorDTO?> FindById(int id)
         {
             var author = await _context.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
-            return _mapper.Map<GetAuthorDTO?>(author);
+            return _mapper.Map<AuthorDTO?>(author);
         }
     }
 }

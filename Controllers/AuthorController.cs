@@ -19,7 +19,7 @@ namespace Test_API.Controllers
         }
 
         [HttpGet(Name = "GetAuthors")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? name = null, [FromQuery] string? bio = null)
         {
             try
             {

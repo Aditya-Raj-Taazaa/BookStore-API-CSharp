@@ -28,21 +28,21 @@ namespace Test_API.Controllers
        
         [ExecutionTimeFilter]
         [HttpGet(Name = "GetBookDetails")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? title = null, [FromQuery] int? price = null)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Page and pageSize must be positive integers.");
 
             try
             {
-                var bookDTOs = await _bookService.ListAsync(page, pageSize);
-                var totalBooks = bookDTOs.Count();
+                var books = await _bookService.ListAsync(page, pageSize, title, price);
+                var totalBooks = await _bookService.CountAsync(title, price);
                 return Ok(new
                 {
                     TotalCount = totalBooks,
                     Page = page,
                     PageSize = pageSize,
-                    Data = bookDTOs
+                    Data = books
                 });
             }
             catch (Exception ex)
@@ -140,7 +140,7 @@ namespace Test_API.Controllers
             try
             {
                 var count = await _bookService.ListAsync(1, int.MaxValue);
-                return Ok(count.Count);
+                return Ok(count.Count());
             }
             catch (Exception ex)
             {
