@@ -3,7 +3,7 @@ using Test_API.Models;
 
 namespace Test_API.Models.DTOs
 {
-    // DTO for returning book data to the client
+    
     public class BookDTO
     {
         public int Id { get; set; }
@@ -12,7 +12,7 @@ namespace Test_API.Models.DTOs
         public string AuthorName { get; set; }
     }
 
-    // DTO for creating a new book
+    
     public class CreateBookDTO
     {
         public string Title { get; set; }
@@ -20,7 +20,7 @@ namespace Test_API.Models.DTOs
         public int AuthorId { get; set; }
     }
 
-    // DTO for updating an existing book
+    
     public class UpdateBookDTO
     {
         public string Title { get; set; }
@@ -33,7 +33,6 @@ namespace Test_API.Models.DTOs
         public int Price { get; set; }
     }
 
-    // AutoMapper profile for mapping between entities and DTOs
     public class MappingProfile : Profile
     {
         public MappingProfile()
