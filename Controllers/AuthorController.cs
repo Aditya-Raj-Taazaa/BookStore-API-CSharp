@@ -24,12 +24,12 @@ namespace Test_API.Controllers
             try
             {
                 if (page <= 0 || pageSize <= 0)
-                {
                     return BadRequest("Page and pageSize must be greater than 0.");
-                }
 
-                var authors = await _authorService.ListAsync(page, pageSize);
-                var totalAuthors = await _authorService.CountAsync();
+                var authors = await _authorService.ListAsync(page, pageSize,name,bio);
+                var totalAuthors = await _authorService.CountAsync(name,bio);
+
+
 
                 return Ok(new
                 {

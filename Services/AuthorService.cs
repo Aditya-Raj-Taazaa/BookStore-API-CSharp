@@ -98,10 +98,10 @@ namespace Test_API.Services
             return new OkResult();
         }
 
-        public async Task<AuthorDTO?> FindById(int id)
+        public async Task<GetAuthorDTO?> FindById(int id)
         {
             var author = await _context.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
-            return _mapper.Map<AuthorDTO?>(author);
+            return _mapper.Map<GetAuthorDTO?>(author);
         }
     }
 }

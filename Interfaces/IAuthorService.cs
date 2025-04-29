@@ -11,6 +11,6 @@ namespace Test_API.Interfaces
         Task<ActionResult<AuthorDTO>> Post(CreateAuthorDTO createAuthorDTO);
         Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, UpdateAuthorDTO updateAuthorDTO);
         Task<IActionResult> DeleteAuthor(int id);
-        Task<AuthorDTO?> FindById(int id);
+        Task<GetAuthorDTO?> FindById(int id);
     }
 }
