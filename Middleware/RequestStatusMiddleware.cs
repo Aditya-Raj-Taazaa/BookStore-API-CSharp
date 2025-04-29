@@ -53,7 +53,7 @@ namespace Test_API.Middleware
             context.Response.Headers["X-App-Name"] = _appInfoService.GetAppName();
             context.Response.Headers["X-App-Version"] = _appInfoService.GetVersion();
 
-            Console.WriteLine("🔀 Middleware Begins");
+            // Console.WriteLine("🔀 Middleware Begins");
 
             await _next(context);
 
@@ -68,7 +68,7 @@ namespace Test_API.Middleware
                 _requestAuditService.LogWrite("Request", id);
 
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"Time Stamp : {startTime} \n");
+            // Console.WriteLine($"Time Stamp : {startTime} \n");
 
             string colorCode = StatusColor(request.Method);
 
@@ -77,12 +77,12 @@ namespace Test_API.Middleware
             else
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-            Console.WriteLine($"Method: {request.Method}");
-            Console.WriteLine($"Endpoint: {host}{request.Path.Value}");
-            Console.WriteLine($"Response Status Code: {response.StatusCode}");
-            Console.WriteLine($"Content Type: {response.ContentType}");
-            Console.WriteLine($"Request Cookies: {string.Join(", ", request.Cookies.Select(c => $"{c.Key}={c.Value}"))}");
-            Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+            // Console.WriteLine($"Method: {request.Method}");
+            // Console.WriteLine($"Endpoint: {host}{request.Path.Value}");
+            // Console.WriteLine($"Response Status Code: {response.StatusCode}");
+            // Console.WriteLine($"Content Type: {response.ContentType}");
+            // Console.WriteLine($"Request Cookies: {string.Join(", ", request.Cookies.Select(c => $"{c.Key}={c.Value}"))}");
+            // Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
             Console.ResetColor();
         }
     }

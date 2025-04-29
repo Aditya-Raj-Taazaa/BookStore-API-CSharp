@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Test_API.Models.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
 using Test_API.Interfaces;
+using Test_API.Models;
+using Test_API.Models.DTOs;
 
 namespace Test_API.Controllers
 {
@@ -9,141 +9,61 @@ namespace Test_API.Controllers
     [Route("api/Authors")]
     public class AuthorController : ControllerBase
     {
-        private readonly IAuthorService _authorService;
-        private readonly ILogger<AuthorController> _logger;
+        private readonly IGenericService<Author, GetAuthorDTO, CreateAuthorDTO, UpdateAuthorDTO> _authorService;
 
-        public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger)
+        public AuthorController(IGenericService<Author, GetAuthorDTO, CreateAuthorDTO, UpdateAuthorDTO> authorService)
         {
             _authorService = authorService;
-            _logger = logger;
         }
 
-        [HttpGet(Name = "GetAuthors")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] int page = 1, int pageSize = 10)
         {
-            try
-            {
-                if (page <= 0 || pageSize <= 0)
-                {
-                    return BadRequest("Page and pageSize must be greater than 0.");
-                }
-
-                var authors = await _authorService.ListAsync(page, pageSize);
-                var totalAuthors = await _authorService.CountAsync();
-
-                return Ok(new
-                {
-                    TotalCount = totalAuthors,
-                    Page = page,
-                    PageSize = pageSize,
-                    Data = authors
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching authors.");
-                return StatusCode(500, "Internal server error");
-            }
+            var authors = await _authorService.ListAsync(page, pageSize);
+            return Ok(authors);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
+            var author = await _authorService.GetByIdAsync(id);
+            if (author.Result is NotFoundResult)
             {
-                var author = await _authorService.FindById(id);
-                if (author == null)
-                {
-                    return NotFound($"The author with ID {id} was not found.");
-                }
+                return NotFound($"The author with ID {id} was not found.");
+            }
 
-                return Ok(author);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An error occurred while fetching the author with ID {id}.");
-                return StatusCode(500, "Internal server error");
-            }
+            return Ok(author.Value);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post(CreateAuthorDTO createAuthorDTO)
         {
-            try
-            {
-                var result = await _authorService.Post(createAuthorDTO);
-                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while creating an author.");
-                return StatusCode(500, "Internal server error");
-            }
+            var result = await _authorService.CreateAsync(createAuthorDTO);
+            return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, UpdateAuthorDTO updateAuthorDTO)
         {
-            try
+            var result = await _authorService.UpdateAsync(id, updateAuthorDTO);
+            if (result.Result is NotFoundResult)
             {
-                var result = await _authorService.UpdateAuthor(id, updateAuthorDTO);
-
-                if (result.Result is BadRequestResult)
-                {
-                    return BadRequest("The provided ID does not match the author ID.");
-                }
-                if (result.Result is NotFoundResult)
-                {
-                    return NotFound("The author with the specified ID was not found.");
-                }
-                if (result.Result is ConflictResult)
-                {
-                    return Conflict("A concurrency issue occurred while updating the author.");
-                }
-
-                return Ok(result.Value);
+                return NotFound($"The author with ID {id} was not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while updating the author.");
-                return StatusCode(500, "Internal server error");
-            }
+
+            return Ok(result.Value);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var result = await _authorService.DeleteAsync(id);
+            if (result is NotFoundResult)
             {
-                var result = await _authorService.DeleteAuthor(id);
+                return NotFound($"The author with ID {id} was not found.");
+            }
 
-                if (result is NotFoundResult)
-                {
-                    return NotFound($"The author with ID {id} was not found.");
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while deleting the author.");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [HttpGet("count")]
-        public async Task<IActionResult> CountAuthors()
-        {
-            try
-            {
-                var count = await _authorService.CountAsync();
-                return Ok(count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while counting authors.");
-                return StatusCode(500, "Internal server error");
-            }
+            return result;
         }
     }
 }

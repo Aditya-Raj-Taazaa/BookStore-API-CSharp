@@ -1,12 +1,7 @@
-using System.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Test_API.Interfaces;
 using Test_API.Models;
 using Test_API.Models.DTOs;
-using Test_API.ActionFilters;
-using Test_API.Services;
-using Test_API.Interfaces;
-using AutoMapper;
 
 namespace Test_API.Controllers
 {
@@ -14,132 +9,61 @@ namespace Test_API.Controllers
     [Route("api/Books")]
     public class BookController : ControllerBase
     {
-        private readonly BookdbContext _context; 
-        private readonly ILogger<BookController> _logger;
-        public readonly AppInfoService _appInfoService;
-        public readonly IBookService _bookService;
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, IBookService bookService)
+        private readonly IGenericService<Book, GetBookDTO, CreateBookDTO, UpdateBookDTO> _bookService;
+
+        public BookController(IGenericService<Book, GetBookDTO, CreateBookDTO, UpdateBookDTO> bookService)
         {
-            _context = context;
-            _logger = logger;
-            _appInfoService = appInfoService;
             _bookService = bookService;
         }
-       
-        [ExecutionTimeFilter]
-        [HttpGet(Name = "GetBookDetails")]
+
+        [HttpGet]
         public async Task<IActionResult> Get([FromQuery] int page = 1, int pageSize = 10)
         {
-            if (page <= 0 || pageSize <= 0)
-                return BadRequest("Page and pageSize must be positive integers.");
-
-            try
-            {
-                var bookDTOs = await _bookService.ListAsync(page, pageSize);
-                return Ok(bookDTOs);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching books.");
-                return StatusCode(500, "Internal server error");
-            }
+            var books = await _bookService.ListAsync(page, pageSize);
+            return Ok(books);
         }
 
-        
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var book = await _bookService.GetByIdAsync(id);
+            if (book.Result is NotFoundResult)
+            {
+                return NotFound($"The book with ID {id} was not found.");
+            }
+
+            return Ok(book.Value);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post(CreateBookDTO createBookDTO)
         {
-            try
-            {
-                var result = await _bookService.Post(createBookDTO);
-                return CreatedAtAction(nameof(GetBook), new { id = result.Value.Id }, result.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while creating a book.");
-                return StatusCode(500, "Internal server error");
-            }
+            var result = await _bookService.CreateAsync(createBookDTO);
+            return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
         }
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, UpdateBookDTO updateBookDTO)
         {
-            try
+            var result = await _bookService.UpdateAsync(id, updateBookDTO);
+            if (result.Result is NotFoundResult)
             {
-                var result = await _bookService.UpdateBook(id, updateBookDTO);
-                if (result.Result is BadRequestResult)
-                    return BadRequest("The provided ID does not match the book ID.");
-                if (result.Result is NotFoundResult)
-                    return NotFound($"The book with ID {id} was not found.");
-                if (result.Result is ConflictResult)
-                    return Conflict("A concurrency issue occurred while updating the book.");
+                return NotFound($"The book with ID {id} was not found.");
+            }
 
-                return Ok(result.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while updating the book.");
-                return StatusCode(500, "Internal server error");
-            }
+            return Ok(result.Value);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var result = await _bookService.DeleteAsync(id);
+            if (result is NotFoundResult)
             {
-                var Book = await _bookService.DeleteBook(id);
+                return NotFound($"The book with ID {id} was not found.");
+            }
 
-                if (Book is NotFoundResult)
-                {
-                    return NotFound($"The Book not Found By ID : {id}");
-                }
-                return Book;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while deleting Book Details");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        
-        
-        [ExecutionTimeFilter]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetBook(int id)
-        {
-            try
-            {
-                var book = await _bookService.FindById(id);
-                if (book == null)
-                {
-                    return NotFound($"The book with ID {id} was not found.");
-                }
-                return Ok(book);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An error occurred while fetching the book with ID {id}.");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [ExecutionTimeFilter]
-        [HttpGet("count")]
-        public async Task<IActionResult> CountBooks()
-        {
-            try
-            {
-                var count = await _bookService.ListAsync(1, int.MaxValue);
-                return Ok(count.Count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while counting Books.");
-                return StatusCode(500, "Internal server error");
-            }
+            return result;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Test_API.ActionFilters
         {
             var endTime = DateTime.Now;
             var duration = endTime - _startTime;
-            Console.WriteLine($"Execution Time: {duration.TotalMilliseconds} ms");
+            // Console.WriteLine($"Execution Time: {duration.TotalMilliseconds} ms");
         }
     }
 }
