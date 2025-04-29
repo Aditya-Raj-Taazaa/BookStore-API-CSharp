@@ -20,25 +20,22 @@ namespace Test_API.Models.DTOs
         public int AuthorId { get; set; }
     }
 
-    
     public class UpdateBookDTO
     {
         public string Title { get; set; }
         public int Price { get; set; }
     }
-
     public class GetBookDTO
     {
         public string Title { get; set; }
         public int Price { get; set; }
     }
-
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
             CreateMap<Book, BookDTO>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name));
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : string.Empty));
             CreateMap<CreateBookDTO, Book>();
             CreateMap<UpdateBookDTO, Book>();
             CreateMap<Book, GetBookDTO>();
