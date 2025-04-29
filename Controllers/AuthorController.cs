@@ -15,7 +15,7 @@ namespace Test_API.Controllers
         private readonly ILogger<AuthorController> _logger;
         private readonly IMapper _mapper;
 
-        public AuthorController(AuthorService authorService, ILogger<AuthorController> logger, IMapper mapper)
+        public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger, IMapper mapper)
         {
             _authorService = authorService;
             _logger = logger;

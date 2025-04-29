@@ -5,6 +5,7 @@ using Test_API.Data;
 using Test_API.ExceptionFilters;
 using Test_API.Services;
 using Test_API.Models.DTOs;
+using Test_API.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,10 +27,10 @@ services.AddAutoMapper(typeof(MappingProfile));
 services.AddSingleton<AppInfoService>();
 services.AddSingleton<RequestAuditService>();
 
-services.AddTransient<FormatterService>();
-services.AddTransient<DataSeeder>();
-services.AddTransient<BookService>();
-services.AddTransient<AuthorService>();
+services.AddScoped<FormatterService>();
+services.AddScoped<DataSeeder>();
+services.AddScoped<IBookService,BookService>();
+services.AddScoped<IAuthorService,AuthorService>();
 
 
 
