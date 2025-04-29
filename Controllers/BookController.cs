@@ -18,35 +18,25 @@ namespace Test_API.Controllers
         private readonly ILogger<BookController> _logger;
         public readonly AppInfoService _appInfoService;
         public readonly IBookService _bookService;
-        public readonly IMapper _mapper;
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, IBookService bookService, IMapper mapper)
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, IBookService bookService)
         {
             _context = context;
             _logger = logger;
             _appInfoService = appInfoService;
             _bookService = bookService;
-            _mapper = mapper;
         }
        
         [ExecutionTimeFilter]
         [HttpGet(Name = "GetBookDetails")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, int pagesize = 1)
+        public async Task<IActionResult> Get([FromQuery] int page = 1, int pageSize = 10)
         {
-            if (page <= 0 || pagesize <= 0)
-                return BadRequest("Page and pagesize must be positive integers.");
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Page and pageSize must be positive integers.");
+
             try
             {
-                var books = await _bookService.ListAsync(page, pagesize);
-                var totalAuthors = books.Count();
-                var bookDTOs = _mapper.Map<IEnumerable<GetBookDTO>>(books);
-                
-                return Ok(new
-                {
-                    TotalCount = totalAuthors,
-                    Page = page,
-                    PageSize = pagesize,
-                    Data = bookDTOs
-                });
+                var bookDTOs = await _bookService.ListAsync(page, pageSize);
+                return Ok(bookDTOs);
             }
             catch (Exception ex)
             {
@@ -57,19 +47,17 @@ namespace Test_API.Controllers
 
         
         [HttpPost]
-        public async Task<ActionResult<Book>> Post(CreateBookDTO createBookDTO)
+        public async Task<IActionResult> Post(CreateBookDTO createBookDTO)
         {
             try
             {
-                var book = _mapper.Map<Book>(createBookDTO);
-                var result = await _bookService.Post(book);
-                var bookDTO = _mapper.Map<BookDTO>(result.Value);
-                return CreatedAtAction(nameof(GetBook),new {id = bookDTO.Id }, bookDTO);
+                var result = await _bookService.Post(createBookDTO);
+                return CreatedAtAction(nameof(GetBook), new { id = result.Value.Id }, result.Value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex,"Error on Creating Book");
-                return StatusCode(500,"Internal Server Error");
+                _logger.LogError(ex, "An error occurred while creating a book.");
+                return StatusCode(500, "Internal server error");
             }
         }
 
@@ -77,28 +65,23 @@ namespace Test_API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, UpdateBookDTO updateBookDTO)
         {
-            var existingBook = await _bookService.FindById(id);
-            if(existingBook == null)
+            try
             {
-                return NotFound($"Book by the Id {id} not Found");
-            }
-            _mapper.Map(updateBookDTO,existingBook);
-            
-            var result = await _bookService.UpdateBook(id, existingBook);
+                var result = await _bookService.UpdateBook(id, updateBookDTO);
+                if (result.Result is BadRequestResult)
+                    return BadRequest("The provided ID does not match the book ID.");
+                if (result.Result is NotFoundResult)
+                    return NotFound($"The book with ID {id} was not found.");
+                if (result.Result is ConflictResult)
+                    return Conflict("A concurrency issue occurred while updating the book.");
 
-            if (result.Result is BadRequestResult)
-            {
-                return BadRequest("The provided ID does not match the book ID.");
+                return Ok(result.Value);
             }
-            if (result.Result is NotFoundResult)
+            catch (Exception ex)
             {
-                return NotFound("The book with the specified ID was not found.");
+                _logger.LogError(ex, "An error occurred while updating the book.");
+                return StatusCode(500, "Internal server error");
             }
-            if (result.Result is ConflictResult)
-            {
-                return Conflict("A concurrency issue occurred while updating the book.");
-            }
-            return Ok(result.Value);
         }
 
         [HttpDelete("{id}")]
@@ -134,9 +117,7 @@ namespace Test_API.Controllers
                 {
                     return NotFound($"The book with ID {id} was not found.");
                 }
-
-                var bookDTO = _mapper.Map<GetBookDTO>(book);
-                return Ok(bookDTO);
+                return Ok(book);
             }
             catch (Exception ex)
             {

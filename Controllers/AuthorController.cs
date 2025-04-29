@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Test_API.Models;
-using Test_API.Services;
-using Test_API.Interfaces;
 using Test_API.Models.DTOs;
+using Test_API.Interfaces;
 
 namespace Test_API.Controllers
 {
@@ -13,13 +11,11 @@ namespace Test_API.Controllers
     {
         private readonly IAuthorService _authorService;
         private readonly ILogger<AuthorController> _logger;
-        private readonly IMapper _mapper;
 
-        public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger, IMapper mapper)
+        public AuthorController(IAuthorService authorService, ILogger<AuthorController> logger)
         {
             _authorService = authorService;
             _logger = logger;
-            _mapper = mapper;
         }
 
         [HttpGet(Name = "GetAuthors")]
@@ -31,17 +27,16 @@ namespace Test_API.Controllers
                 {
                     return BadRequest("Page and pageSize must be greater than 0.");
                 }
-                
+
                 var authors = await _authorService.ListAsync(page, pageSize);
                 var totalAuthors = await _authorService.CountAsync();
-                var authorDTO = _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
 
                 return Ok(new
                 {
                     TotalCount = totalAuthors,
                     Page = page,
                     PageSize = pageSize,
-                    Data = authorDTO
+                    Data = authors
                 });
             }
             catch (Exception ex)
@@ -51,16 +46,33 @@ namespace Test_API.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var author = await _authorService.FindById(id);
+                if (author == null)
+                {
+                    return NotFound($"The author with ID {id} was not found.");
+                }
+
+                return Ok(author);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while fetching the author with ID {id}.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post(CreateAuthorDTO createAuthorDTO)
         {
             try
             {
-                var author = _mapper.Map<Author>(createAuthorDTO);
-                var result = await _authorService.Post(author);
-                var authorDTO = _mapper.Map<AuthorDTO>(result);
-                
-                return CreatedAtAction(nameof(GetById), new { id = author.Id }, result.Value);
+                var result = await _authorService.Post(createAuthorDTO);
+                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
             }
             catch (Exception ex)
             {
@@ -74,16 +86,7 @@ namespace Test_API.Controllers
         {
             try
             {
-                var existingAuthor = await _authorService.FindById(id);
-                if (existingAuthor == null)
-                {
-                    return NotFound($"The author with ID {id} was not found.");
-                }
-
-                _mapper.Map(updateAuthorDTO, existingAuthor);
-
-                var result = await _authorService.UpdateAuthor(id, existingAuthor);
-
+                var result = await _authorService.UpdateAuthor(id, updateAuthorDTO);
 
                 if (result.Result is BadRequestResult)
                 {
@@ -98,8 +101,7 @@ namespace Test_API.Controllers
                     return Conflict("A concurrency issue occurred while updating the author.");
                 }
 
-                var authorDTO = _mapper.Map<AuthorDTO>(result.Value);
-                return Ok(authorDTO);
+                return Ok(result.Value);
             }
             catch (Exception ex)
             {
@@ -125,27 +127,6 @@ namespace Test_API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting the author.");
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            try
-            {
-                var author = await _authorService.FindById(id);
-                if (author == null)
-                {
-                    return NotFound($"The author with ID {id} was not found.");
-                }
-
-                var authorDTO = _mapper.Map<GetAuthorDTO>(author);
-                return Ok(authorDTO);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An error occurred while fetching the author with ID {id}.");
                 return StatusCode(500, "Internal server error");
             }
         }

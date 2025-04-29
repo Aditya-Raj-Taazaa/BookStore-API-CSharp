@@ -1,51 +1,58 @@
-﻿
-using Test_API.Models;
+﻿using Test_API.Models;
+using Test_API.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Test_API.Interfaces;
+using AutoMapper;
 
 namespace Test_API.Services
 {
-    public class AuthorService(BookdbContext context, FormatterService formatterService) : IAuthorService
+    public class AuthorService : IAuthorService
     {
-        private readonly BookdbContext _context = context;
-        private readonly FormatterService _formatterService = formatterService;
+        private readonly BookdbContext _context;
+        private readonly FormatterService _formatterService;
+        private readonly IMapper _mapper;
+
+        public AuthorService(BookdbContext context, FormatterService formatterService, IMapper mapper)
+        {
+            _context = context;
+            _formatterService = formatterService;
+            _mapper = mapper;
+        }
 
         public async Task<int> CountAsync()
         {
             return await _context.Authors.CountAsync();
         }
 
-        public async Task<IEnumerable<Author>> ListAsync(int page, int pageSize)
+        public async Task<IEnumerable<GetAuthorDTO>> ListAsync(int page, int pageSize)
         {
-            return await _context.Authors
+            var authors = await _context.Authors
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+            return _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
         }
 
-        public async Task<ActionResult<Author>> Post(Author Author)
+        public async Task<ActionResult<AuthorDTO>> Post(CreateAuthorDTO createAuthorDTO)
         {
-            Author.Bio = _formatterService.BioFormat(Author.Bio);
-            _context.Authors.Add(Author);
+            var author = _mapper.Map<Author>(createAuthorDTO);
+            author.Bio = _formatterService.BioFormat(author.Bio);
+            _context.Authors.Add(author);
             await _context.SaveChangesAsync();
-            return new ActionResult<Author>(Author);
+            var authorDTO = _mapper.Map<AuthorDTO>(author);
+            return new ActionResult<AuthorDTO>(authorDTO);
         }
 
-        public async Task<ActionResult<Author>> UpdateAuthor(int id, Author author)
+        public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, UpdateAuthorDTO updateAuthorDTO)
         {
-            if (id != author.Id)
-            {
-                return new BadRequestResult();
-            }
-
             var existingAuthor = await FindById(id);
             if (existingAuthor == null)
             {
                 return new NotFoundResult();
             }
-
-            _context.Entry(author).State = EntityState.Modified;
+            _mapper.Map(updateAuthorDTO, existingAuthor);
+            _context.Entry(existingAuthor).State = EntityState.Modified;
 
             try
             {
@@ -56,32 +63,27 @@ namespace Test_API.Services
                 Console.WriteLine("Concurrency exception: " + ex.Message);
                 return new ConflictResult();
             }
-
-            return new ActionResult<Author>(author);
-            
+            var authorDTO = _mapper.Map<AuthorDTO>(existingAuthor);
+            return new ActionResult<AuthorDTO>(authorDTO);
         }
 
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            var AuthorToDelete = await FindById(id);
-            if(AuthorToDelete == null)
+            var authorToDelete = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            if (authorToDelete == null)
             {
                 return new NotFoundResult();
             }
-
-            _context.Authors.Remove(AuthorToDelete);
+            _context.Authors.Remove(authorToDelete);
             await _context.SaveChangesAsync();
-            return new OkObjectResult(AuthorToDelete);  
+            var authorDTO = _mapper.Map<AuthorDTO>(authorToDelete);
+            return new OkObjectResult(authorDTO);
         }
 
-        private async Task<bool> AuthorExists(int id)
+        public async Task<GetAuthorDTO?> FindById(int id)
         {
-            return await _context.Authors.AnyAsync(b => b.Id == id);
-        }
-
-        public async Task<Author?> FindById(int id)
-        {
-            return await _context.Authors.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+            var author = await _context.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+            return _mapper.Map<GetAuthorDTO?>(author);
         }
     }
 }
