@@ -3,9 +3,10 @@ using Test_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Azure;
+using Test_API.Interfaces;
 namespace Test_API.Services
 {
-    public class BookService(BookdbContext context)
+    public class BookService(BookdbContext context) : IBookService
     {
         private readonly BookdbContext _context = context;
 
@@ -70,9 +71,9 @@ namespace Test_API.Services
             return await _context.Books.AnyAsync(b => b.Id == id);
         }
 
-        private async Task<Book?> FindById(int id)
-{
-    return await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
-}
+        public async Task<Book?> FindById(int id)
+        {
+            return await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+        }
     }
 }

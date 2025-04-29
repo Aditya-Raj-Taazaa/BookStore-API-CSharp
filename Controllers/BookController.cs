@@ -34,14 +34,19 @@ namespace Test_API.Controllers
         {
             if (page <= 0 || pagesize <= 0)
                 return BadRequest("Page and pagesize must be positive integers.");
-
             try
             {
                 var books = await _bookService.ListAsync(page, pagesize);
-
+                var totalAuthors = books.Count();
                 var bookDTOs = _mapper.Map<IEnumerable<GetBookDTO>>(books);
-
-                return Ok(bookDTOs);
+                
+                return Ok(new
+                {
+                    TotalCount = totalAuthors,
+                    Page = page,
+                    PageSize = pagesize,
+                    Data = bookDTOs
+                });
             }
             catch (Exception ex)
             {
@@ -52,17 +57,20 @@ namespace Test_API.Controllers
 
         
         [HttpPost]
-        public async Task<ActionResult<Book>> Post(Book book)
+        public async Task<ActionResult<Book>> Post(CreateBookDTO createBookDTO)
         {
-            try{
-                return await _bookService.Post(book);
+            try
+            {
+                var book = _mapper.Map<Book>(createBookDTO);
+                var result = await _bookService.Post(book);
+                var bookDTO = _mapper.Map<BookDTO>(result.Value);
+                return CreatedAtAction(nameof(GetBook),new {id = bookDTO.Id }, bookDTO);
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex,"Error on Creating Book");
                 return StatusCode(500,"Internal Server Error");
             }
-            
         }
 
 

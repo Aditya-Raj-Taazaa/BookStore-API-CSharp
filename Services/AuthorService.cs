@@ -2,10 +2,11 @@
 using Test_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Test_API.Interfaces;
 
 namespace Test_API.Services
 {
-    public class AuthorService(BookdbContext context, FormatterService formatterService)
+    public class AuthorService(BookdbContext context, FormatterService formatterService) : IAuthorService
     {
         private readonly BookdbContext _context = context;
         private readonly FormatterService _formatterService = formatterService;
