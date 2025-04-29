@@ -13,14 +13,14 @@ namespace Test_API.Data
 
         public async Task SeedAsync()
         {
-            // Check if data already exists
+            
             if (_context.Authors.Any() || _context.Books.Any())
             {
                 Console.WriteLine("Database already seeded");
                 return;
             }
 
-            // Create authors
+            
             var authors = new[]
             {
             new Author
@@ -30,11 +30,11 @@ namespace Test_API.Data
             }, 
         };
 
-            // Add authors to database
+            
             await _context.Authors.AddRangeAsync(authors);
             await _context.SaveChangesAsync();
 
-            // Create books
+            
             var books = new[]
             {
             new Book
@@ -57,7 +57,7 @@ namespace Test_API.Data
             }
         };
 
-            // Add books to database
+            
             await _context.Books.AddRangeAsync(books);
             await _context.SaveChangesAsync();
 

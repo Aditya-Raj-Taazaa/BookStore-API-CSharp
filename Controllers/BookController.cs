@@ -19,7 +19,7 @@ namespace Test_API.Controllers
         public readonly AppInfoService _appInfoService;
         public readonly IBookService _bookService;
         public readonly IMapper _mapper;
-        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, IBookService bookService, IMapper mapper) // Change parameter type to BookdbContext
+        public BookController(BookdbContext context, ILogger<BookController> logger, AppInfoService appInfoService, IBookService bookService, IMapper mapper)
         {
             _context = context;
             _logger = logger;
