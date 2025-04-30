@@ -35,18 +35,18 @@ namespace Test_API.Services
             return await query.CountAsync();
         }
 
-        public async Task<IEnumerable<GetAuthorDTO>> ListAsync(int page, int pageSize, string? name = null, string? bio = null)
+        public async Task<IEnumerable<GetAuthorDTO>> ListAsync(AuthorFilterDTO filters)
         {
             var query = _context.Authors.AsQueryable();
-            if (!string.IsNullOrEmpty(name))
-                query = query.Where(a => a.Name.Contains(name));
+            if (!string.IsNullOrEmpty(filters.Name))
+                query = query.Where(a => a.Name.Contains(filters.Name));
 
-            if (!string.IsNullOrEmpty(bio))
-                query = query.Where(a => a.Bio.Contains(bio));
+            if (!string.IsNullOrEmpty(filters.Bio))
+                query = query.Where(a => a.Bio.Contains(filters.Bio));
 
             var authors = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((filters.Page - 1) * filters.PageSize)
+                .Take(filters.PageSize)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
         }

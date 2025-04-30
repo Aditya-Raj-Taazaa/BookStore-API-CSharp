@@ -19,22 +19,22 @@ namespace Test_API.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetAuthors")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? name = null, [FromQuery] string? bio = null)
+        [HttpPost("GetAuthors")]
+        public async Task<IActionResult> Post([FromBody] AuthorFilterDTO filters)
         {
             try
             {
-                if (page <= 0 || pageSize <= 0)
+                if (filters.Page <= 0 || filters.PageSize <= 0)
                     return BadRequest("Page and pageSize must be greater than 0.");
 
-                var authors = await _authorService.ListAsync(page, pageSize,name,bio);
-                var totalAuthors = await _authorService.CountAsync(name,bio);
+                var authors = await _authorService.ListAsync(filters);
+                var totalAuthors = await _authorService.CountAsync(filters.Name, filters.Bio);
 
                 return Ok(new
                 {
                     TotalCount = totalAuthors,
-                    Page = page,
-                    PageSize = pageSize,
+                    Page = filters.Page,
+                    PageSize = filters.PageSize,
                     Data = authors
                 });
             }
@@ -65,7 +65,7 @@ namespace Test_API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("createAuthor")]
         public async Task<IActionResult> Post(AuthorDTO authorDTO)
         {
             try

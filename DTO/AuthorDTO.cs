@@ -22,7 +22,7 @@ namespace Test_API.DTO
             CreateMap<Author, AuthorDTO>();   
             CreateMap<Author, GetAuthorDTO>();
             CreateMap<AuthorDTO,Author>() // for create and update
-                    .ForMember(dest => dest.Id, opt => opt.Ignore()); //ignores Id when overwriting (Update func.)
+                    .ForMember(dest => dest.Id, opt => opt.Ignore()); //ignores Id when overwriting e.g :(Update func.)
         }
     }
 }

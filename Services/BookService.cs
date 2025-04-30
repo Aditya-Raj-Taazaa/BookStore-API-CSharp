@@ -36,36 +36,31 @@ namespace Test_API.Services
             return await query.CountAsync();
         }
 
-        public async Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null, string? author = null)
+        public async Task<IEnumerable<GetBookDTO>> ListAsync(BookFilterDTO filter)
         {
-            
             var query = _context.Books
-            .Include(b => b.Author)
-            .AsNoTracking()
-            .AsQueryable();
-            
-            if (!string.IsNullOrEmpty(title))
+                .Include(b => b.Author)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.Title))
             {
-                query = query.Where(b => b.Title.Contains(title));
+                query = query.Where(b => b.Title.Contains(filter.Title));
             }
 
-            if (price.HasValue)
+            if (filter.Price > 0)
             {
-                query = from b in query
-                        where b.Price == price.Value
-                        select b;
+                query = query.Where(b => b.Price == filter.Price);
             }
 
-            if (!string.IsNullOrEmpty(author))
+            if (!string.IsNullOrEmpty(filter.Author))
             {
-                query = from b in query
-                        where b.Author.Name.Contains(author)
-                        select b;
+                query = query.Where(b => b.Author != null && b.Author.Name.Contains(filter.Author));
             }
 
             var books = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<GetBookDTO>>(books);
@@ -73,7 +68,6 @@ namespace Test_API.Services
 
         public async Task<ActionResult<BookDTO>> Post(BookDTO bookDTO)
         {
-            // Validate if the AuthorId exists
             var authorExists = await _context.Authors.AnyAsync(a => a.Id == bookDTO.AuthorId);
             if (!authorExists)
             {
@@ -128,17 +122,34 @@ namespace Test_API.Services
 
         public async Task<GetBookDTO?> FindById(int id)
         {
-            var book = await _context.Books
-            .Include(b => b.Author)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(b => b.Id == id);
-            
-            if (book == null)
+            var query = from book in _context.Books
+                        join author in _context.Authors
+                        on book.AuthorId equals author.Id
+                        where book.Id == id
+                        select new
+                        {
+                            BookId = book.Id,
+                            book.Title,
+                            book.Price,
+                            AuthorName = author.Name,
+                            AuthorBio = author.Bio
+                        };
+
+            var result = await query.FirstOrDefaultAsync();
+
+            if (result == null)
             {
                 return null;
             }
 
-            return _mapper.Map<GetBookDTO>(book);
+            return new GetBookDTO
+            {
+                Id = result.BookId,
+                Title = result.Title,
+                Price = result.Price,
+                AuthorName = result.AuthorName,
+                AuthorBio = result.AuthorBio
+            };
         }
     }
 }

@@ -16,11 +16,13 @@ namespace Test_API.DTO
 
     public class GetBookDTO
     {
+        public int Id {get; set;}
         public string Title { get; set; }
         public int Price { get; set; }
-
         public string ?AuthorName {get; set;}
+        public string ?AuthorBio {get; set;}
     }
+
     public class MappingProfile : Profile
     {
         public MappingProfile()

@@ -27,21 +27,21 @@ namespace Test_API.Controllers
         }
        
         [ExecutionTimeFilter]
-        [HttpGet(Name = "GetBookDetails")]
-        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? title = null, [FromQuery] int? price = null, [FromQuery] string? author = null)
+        [HttpPost("GetBookDetails")]
+        public async Task<IActionResult> Post([FromBody] BookFilterDTO filter)
         {
-            if (page <= 0 || pageSize <= 0)
-                return BadRequest("Page and pageSize must be positive integers.");
+            if (filter.Page <= 0 || filter.PageSize <= 0)
+                return BadRequest("Page and PageSize must be positive integers.");
 
             try
             {
-                var books = await _bookService.ListAsync(page, pageSize, title, price,author);
-                var totalBooks = await _bookService.CountAsync(title, price);
+                var books = await _bookService.ListAsync(filter);
+                var totalBooks = await _bookService.CountAsync(filter.Title, filter.Price);
                 return Ok(new
                 {
                     TotalCount = totalBooks,
-                    Page = page,
-                    PageSize = pageSize,
+                    Page = filter.Page,
+                    PageSize = filter.PageSize,
                     Data = books
                 });
             }
@@ -140,17 +140,17 @@ namespace Test_API.Controllers
         }
 
         [ExecutionTimeFilter]
-        [HttpGet("count")]
-        public async Task<IActionResult> CountBooks()
+        [HttpPost("count")]
+        public async Task<IActionResult> CountBooks([FromBody] BookFilterDTO filter)
         {
             try
             {
-                var count = await _bookService.ListAsync(1, int.MaxValue);
-                return Ok(count.Count());
+                var totalBooks = await _bookService.CountAsync(filter.Title, filter.Price);
+                return Ok(totalBooks);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while counting Books.");
+                _logger.LogError(ex, "An error occurred while counting books.");
                 return StatusCode(500, "Internal server error");
             }
         }
