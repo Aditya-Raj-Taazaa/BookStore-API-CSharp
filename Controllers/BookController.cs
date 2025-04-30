@@ -54,12 +54,18 @@ namespace Test_API.Controllers
 
         
         [HttpPost]
-        public async Task<IActionResult> Post(CreateBookDTO createBookDTO)
+        public async Task<IActionResult> Post(BookDTO bookDTO)
         {
             try
             {
-                var result = await _bookService.Post(createBookDTO);
-                return CreatedAtAction(nameof(GetBook), new { id = result.Value.Id }, result.Value);
+                var result = await _bookService.Post(bookDTO);
+
+                if (result.Result is BadRequestObjectResult badRequest)
+                {
+                    return BadRequest(badRequest.Value);
+                }
+
+                return CreatedAtAction(nameof(GetBook), new { id = result.Value?.Id }, result.Value);
             }
             catch (Exception ex)
             {
@@ -70,11 +76,11 @@ namespace Test_API.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, UpdateBookDTO updateBookDTO)
+        public async Task<IActionResult> Put(int id, BookDTO bookDTO)
         {
             try
             {
-                var result = await _bookService.UpdateBook(id, updateBookDTO);
+                var result = await _bookService.UpdateBook(id, bookDTO);
                 if (result.Result is BadRequestResult)
                     return BadRequest("The provided ID does not match the book ID.");
                 if (result.Result is NotFoundResult)

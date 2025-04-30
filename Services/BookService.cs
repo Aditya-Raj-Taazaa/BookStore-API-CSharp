@@ -11,6 +11,7 @@ namespace Test_API.Services
     {
         private readonly BookdbContext _context;
         private readonly IMapper _mapper;
+        
 
         public BookService(BookdbContext context, IMapper mapper)
         {
@@ -57,16 +58,24 @@ namespace Test_API.Services
             return _mapper.Map<IEnumerable<GetBookDTO>>(books);
         }
 
-        public async Task<ActionResult<BookDTO>> Post(CreateBookDTO createBookDTO)
+        public async Task<ActionResult<BookDTO>> Post(BookDTO bookDTO)
         {
-            var book = _mapper.Map<Book>(createBookDTO);
+            // Validate if the AuthorId exists
+            var authorExists = await _context.Authors.AnyAsync(a => a.Id == bookDTO.AuthorId);
+            if (!authorExists)
+            {
+                return new BadRequestObjectResult($"Author with ID {bookDTO.AuthorId} does not exist.");
+            }
+
+            var book = _mapper.Map<Book>(bookDTO);
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
-            var bookDTO = _mapper.Map<BookDTO>(book);
-            return new ActionResult<BookDTO>(bookDTO);
+
+            var updatedBookDTO = _mapper.Map<BookDTO>(book);
+            return new ActionResult<BookDTO>(updatedBookDTO);
         }
 
-        public async Task<ActionResult<BookDTO>> UpdateBook(int id, UpdateBookDTO updateBookDTO)
+        public async Task<ActionResult<BookDTO>> UpdateBook(int id, BookDTO bookDTO)
         {
             var existingBook = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
             if (existingBook == null)
@@ -74,7 +83,7 @@ namespace Test_API.Services
                 return new NotFoundResult();
             }
 
-            _mapper.Map(updateBookDTO, existingBook);
+            _mapper.Map(bookDTO, existingBook);
             _context.Entry(existingBook).State = EntityState.Modified;
 
             try
@@ -86,8 +95,8 @@ namespace Test_API.Services
                 return new ConflictResult();
             }
 
-            var bookDTO = _mapper.Map<BookDTO>(existingBook);
-            return new ActionResult<BookDTO>(bookDTO);
+            var UpdatedbookDTO = _mapper.Map<BookDTO>(existingBook);
+            return new ActionResult<BookDTO>(UpdatedbookDTO);
         }
 
         public async Task<IActionResult> DeleteBook(int id)
@@ -104,10 +113,19 @@ namespace Test_API.Services
             return new OkResult();
         }
 
-        public async Task<BookDTO?> FindById(int id)
+        public async Task<GetBookDTO?> FindById(int id)
         {
-            var book = await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
-            return _mapper.Map<BookDTO?>(book);
+            var book = await _context.Books
+            .Include(b => b.Author)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.Id == id);
+            
+            if (book == null)
+            {
+                return null;
+            }
+
+            return _mapper.Map<GetBookDTO>(book);
         }
     }
 }

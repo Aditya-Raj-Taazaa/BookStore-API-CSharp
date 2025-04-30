@@ -51,16 +51,17 @@ namespace Test_API.Services
             return _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
         }
 
-        public async Task<ActionResult<AuthorDTO>> Post(CreateAuthorDTO createAuthorDTO)
+        public async Task<ActionResult<AuthorDTO>> Post(AuthorDTO authorDTO)
         {
-            var author = _mapper.Map<Author>(createAuthorDTO);
+            var author = _mapper.Map<Author>(authorDTO);
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
-            var authorDTO = _mapper.Map<AuthorDTO>(author);
-            return new ActionResult<AuthorDTO>(authorDTO);
+
+            var createdAuthorDTO = _mapper.Map<AuthorDTO>(author);
+            return new ActionResult<AuthorDTO>(createdAuthorDTO);
         }
 
-        public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, UpdateAuthorDTO updateAuthorDTO)
+        public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, AuthorDTO authorDTO)
         {
             var existingAuthor = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
             if (existingAuthor == null)
@@ -68,7 +69,7 @@ namespace Test_API.Services
                 return new NotFoundResult();
             }
 
-            _mapper.Map(updateAuthorDTO, existingAuthor);
+            _mapper.Map(authorDTO, existingAuthor);
             _context.Entry(existingAuthor).State = EntityState.Modified;
 
             try
@@ -79,9 +80,8 @@ namespace Test_API.Services
             {
                 return new ConflictResult();
             }
-
-            var authorDTO = _mapper.Map<AuthorDTO>(existingAuthor);
-            return new ActionResult<AuthorDTO>(authorDTO);
+            var updatedAuthorDTO = _mapper.Map<AuthorDTO>(existingAuthor);
+            return new ActionResult<AuthorDTO>(updatedAuthorDTO);
         }
 
         public async Task<IActionResult> DeleteAuthor(int id)

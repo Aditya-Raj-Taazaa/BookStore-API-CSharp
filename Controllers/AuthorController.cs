@@ -30,7 +30,6 @@ namespace Test_API.Controllers
                 var totalAuthors = await _authorService.CountAsync(name,bio);
 
 
-
                 return Ok(new
                 {
                     TotalCount = totalAuthors,
@@ -67,12 +66,12 @@ namespace Test_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(CreateAuthorDTO createAuthorDTO)
+        public async Task<IActionResult> Post(AuthorDTO authorDTO)
         {
             try
             {
-                var result = await _authorService.Post(createAuthorDTO);
-                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+                var result = await _authorService.Post(authorDTO);
+                return CreatedAtAction(nameof(GetById), new { id = result.Value?.Id }, result.Value);
             }
             catch (Exception ex)
             {
@@ -82,11 +81,11 @@ namespace Test_API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, UpdateAuthorDTO updateAuthorDTO)
+        public async Task<IActionResult> Put(int id, AuthorDTO authorDTO)
         {
             try
             {
-                var result = await _authorService.UpdateAuthor(id, updateAuthorDTO);
+                var result = await _authorService.UpdateAuthor(id, authorDTO);
 
                 if (result.Result is BadRequestResult)
                 {

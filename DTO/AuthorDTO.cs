@@ -10,18 +10,6 @@ namespace Test_API.Models.DTOs
          public string Bio { get; set; }
     }
      
-    public class CreateAuthorDTO
-    {
-         public string Name { get; set; }
-         public string Bio { get; set; }
-    }
-
-    public class UpdateAuthorDTO
-    {
-         public string Name { get; set; }
-         public string Bio { get; set; }
-    }
-     
     public class GetAuthorDTO
     {
          public string Name { get; set; }
@@ -33,8 +21,8 @@ namespace Test_API.Models.DTOs
         {
             CreateMap<Author, AuthorDTO>();   
             CreateMap<Author, GetAuthorDTO>();
-            CreateMap<CreateAuthorDTO, Author>();
-            CreateMap<UpdateAuthorDTO, Author>();
+            CreateMap<AuthorDTO,Author>() // for create and update
+                    .ForMember(dest => dest.Id, opt => opt.Ignore()); //ignores Id when overwriting (Update func.)
         }
     }
 }
