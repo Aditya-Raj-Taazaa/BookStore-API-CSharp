@@ -1,4 +1,4 @@
-﻿using Test_API.Models;
+﻿using Test_API.Domains;
 
 namespace Test_API.Data
 {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Test_API.Models;
-using Test_API.Models.DTOs;
+using Test_API.Domains;
+using Test_API.DTO;
 
 namespace Test_API.Interfaces
 {

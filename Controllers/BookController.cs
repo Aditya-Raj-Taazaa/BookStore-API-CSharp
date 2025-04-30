@@ -1,8 +1,8 @@
 using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Test_API.Models;
-using Test_API.Models.DTOs;
+using Test_API.Domains;
+using Test_API.DTO;
 using Test_API.ActionFilters;
 using Test_API.Services;
 using Test_API.Interfaces;

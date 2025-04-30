@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Test_API.Models.DTOs;
+using Test_API.Domains;
 using Test_API.Interfaces;
+using Test_API.DTO;
 
 namespace Test_API.Controllers
 {
@@ -28,7 +29,6 @@ namespace Test_API.Controllers
 
                 var authors = await _authorService.ListAsync(page, pageSize,name,bio);
                 var totalAuthors = await _authorService.CountAsync(name,bio);
-
 
                 return Ok(new
                 {

@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Test_API.Models;
+using Test_API.Domains;
 
-namespace Test_API.Models.DTOs
+namespace Test_API.DTO
 {
     
     public class BookDTO

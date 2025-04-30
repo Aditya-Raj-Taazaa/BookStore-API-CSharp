@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Test_API.Models
+namespace Test_API.Domains
 {
     public class BookdbContext : DbContext
     {
