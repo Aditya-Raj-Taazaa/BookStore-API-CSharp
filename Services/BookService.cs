@@ -36,7 +36,7 @@ namespace Test_API.Services
             return await query.CountAsync();
         }
 
-        public async Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null)
+        public async Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null, string? author = null)
         {
             
             var query = _context.Books
@@ -51,7 +51,16 @@ namespace Test_API.Services
 
             if (price.HasValue)
             {
-                query = query.Where(b => b.Price == price.Value);
+                query = from b in query
+                        where b.Price == price.Value
+                        select b;
+            }
+
+            if (!string.IsNullOrEmpty(author))
+            {
+                query = from b in query
+                        where b.Author.Name.Contains(author)
+                        select b;
             }
 
             var books = await query

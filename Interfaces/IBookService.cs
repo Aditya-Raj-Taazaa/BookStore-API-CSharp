@@ -7,7 +7,7 @@ namespace Test_API.Interfaces
     public interface IBookService
     {
         Task<int> CountAsync(string? title = null, int? price = null);
-        Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null);
+        Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null, string? author = null);
         Task<ActionResult<BookDTO>> Post(BookDTO bookDTO);
         Task<ActionResult<BookDTO>> UpdateBook(int id, BookDTO bookDTO);
         Task<IActionResult> DeleteBook(int id);
