@@ -38,8 +38,12 @@ namespace Test_API.Services
 
         public async Task<IEnumerable<GetBookDTO>> ListAsync(int page, int pageSize, string? title = null, int? price = null)
         {
-            var query = _context.Books.AsQueryable();
-
+            
+            var query = _context.Books
+            .Include(b => b.Author)
+            .AsNoTracking()
+            .AsQueryable();
+            
             if (!string.IsNullOrEmpty(title))
             {
                 query = query.Where(b => b.Title.Contains(title));

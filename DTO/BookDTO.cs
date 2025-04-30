@@ -18,6 +18,8 @@ namespace Test_API.Models.DTOs
     {
         public string Title { get; set; }
         public int Price { get; set; }
+
+        public string ?AuthorName {get; set;}
     }
     public class MappingProfile : Profile
     {
