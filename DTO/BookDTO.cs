@@ -27,15 +27,13 @@ namespace Test_API.DTO
     {
         public MappingProfile()
         {
-            CreateMap<Book, GetBookDTO>()
-            .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : null))
-            .ForMember(dest => dest.AuthorBio, opt => opt.MapFrom(src => src.Author != null ? src.Author.Bio : null));
+            CreateMap<Book, GetBookDTO>();
 
-        CreateMap<Book, BookDTO>()
-            .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : string.Empty));
-
-        CreateMap<BookDTO, Book>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore());
-    }
+            CreateMap<Book, BookDTO>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author != null ? src.Author.Name : string.Empty));
+            
+            CreateMap<BookDTO,Book>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore()); 
+        }
     }
 }

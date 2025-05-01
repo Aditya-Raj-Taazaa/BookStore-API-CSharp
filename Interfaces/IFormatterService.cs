@@ -5,7 +5,7 @@ using Test_API.DTO;
 namespace Test_API.Interfaces
 {
     public interface IFormatterService
-{
-    public string BioFormat(string input);
-}
+    {
+        public string BioFormat(string input);
+    }
 }
