@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Test_API.Interfaces;
 
 namespace Test_API.Services
 {
-    public class AppInfoService
+    public class AppInfoService : IAppInfoService
     {
         private readonly IConfiguration _config;
 

@@ -1,7 +1,10 @@
-﻿
+﻿using Test_API.Interfaces;
+{
+    
+}
 namespace Test_API.Services
 {
-    public class FormatterService
+    public class FormatterService : IFormatterService
     {
         public string BioFormat(string input)
         {

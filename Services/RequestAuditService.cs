@@ -1,7 +1,7 @@
-﻿
+﻿using Test_API.Interfaces;
 namespace Test_API.Services
 {
-    public class RequestAuditService
+    public class RequestAuditService : IRequestAuditServices
     {
 
         public RequestAuditService()
