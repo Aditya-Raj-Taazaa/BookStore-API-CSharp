@@ -33,7 +33,7 @@ namespace Test_API.Repositories
                 query = include(query);
             }
 
-            return await query.Where(predicate).ToListAsync();
+                return await query.Where(predicate).ToListAsync();
         }
 
         public async Task AddAsync(T entity)

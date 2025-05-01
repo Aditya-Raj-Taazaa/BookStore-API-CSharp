@@ -20,8 +20,7 @@ namespace Test_API.Services
         public async Task<int> CountAsync(string? name = null, string? bio = null)
         {
             return await _authorRepository.CountAsync(a =>
-                (string.IsNullOrEmpty(name) || a.Name.Contains(name)) &&
-                (string.IsNullOrEmpty(bio) || a.Bio.Contains(bio)));
+                (string.IsNullOrEmpty(name) || a.Name.Contains(name)) && (string.IsNullOrEmpty(bio) || a.Bio.Contains(bio)));
         }
 
         public async Task<IEnumerable<GetAuthorDTO>> ListAsync(AuthorFilterDTO filters)
@@ -30,11 +29,11 @@ namespace Test_API.Services
                 (string.IsNullOrEmpty(filters.Name) || a.Name.Contains(filters.Name)) &&
                 (string.IsNullOrEmpty(filters.Bio) || a.Bio.Contains(filters.Bio)));
 
-            var paginatedAuthors = authors
+        var paginatedAuthors = authors
                 .Skip((filters.Page - 1) * filters.PageSize)
                 .Take(filters.PageSize);
 
-            return _mapper.Map<IEnumerable<GetAuthorDTO>>(paginatedAuthors);
+                return _mapper.Map<IEnumerable<GetAuthorDTO>>(paginatedAuthors);
         }
 
         public async Task<ActionResult<AuthorDTO>> Post(AuthorDTO authorDTO)
@@ -42,17 +41,16 @@ namespace Test_API.Services
             var author = _mapper.Map<Author>(authorDTO);
             await _authorRepository.AddAsync(author);
 
-            var createdAuthorDTO = _mapper.Map<AuthorDTO>(author);
+        var createdAuthorDTO = _mapper.Map<AuthorDTO>(author);
             return new ActionResult<AuthorDTO>(createdAuthorDTO);
         }
 
         public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, AuthorDTO authorDTO)
         {
             var existingAuthor = await _authorRepository.GetByIdAsync(id);
+            
             if (existingAuthor == null)
-            {
-                return new NotFoundResult();
-            }
+            return new NotFoundResult();
 
             _mapper.Map(authorDTO, existingAuthor);
             _authorRepository.Update(existingAuthor);
@@ -65,9 +63,7 @@ namespace Test_API.Services
         {
             var authorToDelete = await _authorRepository.GetByIdAsync(id);
             if (authorToDelete == null)
-            {
-                return new NotFoundResult();
-            }
+             return new NotFoundResult();
 
             _authorRepository.Remove(authorToDelete);
             return new OkResult();
