@@ -5,6 +5,7 @@ using Test_API.Data;
 using Test_API.ExceptionFilters;
 using Test_API.Services;
 using Test_API.DTO;
+using Test_API.Repositories;
 using Test_API.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,8 @@ services.AddSingleton<IRequestAuditServices,RequestAuditService>();
 
 services.AddScoped<IFormatterService,FormatterService>();
 services.AddScoped<DataSeeder>();
+services.AddScoped<IBookRepository, BookRepository>();
+services.AddScoped<IAuthorRepository, AuthorRepository>();
 services.AddScoped<IBookService, BookService>();
 services.AddScoped<IAuthorService, AuthorService>();
 
