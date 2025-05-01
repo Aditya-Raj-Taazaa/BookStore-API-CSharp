@@ -12,7 +12,5 @@ namespace Test_API.DTO
         public int PageSize { get; set; }
         public int Price {get; set;}
         public string? Author {get; set;}
-    }
-
-    
+    } 
 }

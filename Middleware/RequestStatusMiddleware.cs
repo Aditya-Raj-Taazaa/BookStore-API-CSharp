@@ -22,7 +22,7 @@ namespace Test_API.Middleware
                 "GET" => "Green",
                 "PUT" => "Blue",
                 "DELETE" => "Red",
-                _ => "Yellow",
+                _ => "DarkYellow",
             };
         }
 
