@@ -1,6 +1,5 @@
 ﻿using Test_API.Domains;
 using Test_API.DTO;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Test_API.Interfaces;
 using AutoMapper;
@@ -9,53 +8,39 @@ namespace Test_API.Services
 {
     public class AuthorService : IAuthorService
     {
-        private readonly BookdbContext _context;
+        private readonly IAuthorRepository _authorRepository;
         private readonly IMapper _mapper;
 
-        public AuthorService(BookdbContext context, IMapper mapper)
+        public AuthorService(IAuthorRepository authorRepository, IMapper mapper)
         {
-            _context = context;
+            _authorRepository = authorRepository;
             _mapper = mapper;
         }
 
         public async Task<int> CountAsync(string? name = null, string? bio = null)
         {
-            var query = _context.Authors.AsQueryable();
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                query = query.Where(a => a.Name.Contains(name));
-            }
-
-            if (!string.IsNullOrEmpty(bio))
-            {
-                query = query.Where(a => a.Bio.Contains(bio));
-            }
-
-            return await query.CountAsync();
+            return await _authorRepository.CountAsync(a =>
+                (string.IsNullOrEmpty(name) || a.Name.Contains(name)) &&
+                (string.IsNullOrEmpty(bio) || a.Bio.Contains(bio)));
         }
 
         public async Task<IEnumerable<GetAuthorDTO>> ListAsync(AuthorFilterDTO filters)
         {
-            var query = _context.Authors.AsQueryable();
-            if (!string.IsNullOrEmpty(filters.Name))
-                query = query.Where(a => a.Name.Contains(filters.Name));
+            var authors = await _authorRepository.FindAsync(a =>
+                (string.IsNullOrEmpty(filters.Name) || a.Name.Contains(filters.Name)) &&
+                (string.IsNullOrEmpty(filters.Bio) || a.Bio.Contains(filters.Bio)));
 
-            if (!string.IsNullOrEmpty(filters.Bio))
-                query = query.Where(a => a.Bio.Contains(filters.Bio));
-
-            var authors = await query
+            var paginatedAuthors = authors
                 .Skip((filters.Page - 1) * filters.PageSize)
-                .Take(filters.PageSize)
-                .ToListAsync();
-            return _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
+                .Take(filters.PageSize);
+
+            return _mapper.Map<IEnumerable<GetAuthorDTO>>(paginatedAuthors);
         }
 
         public async Task<ActionResult<AuthorDTO>> Post(AuthorDTO authorDTO)
         {
             var author = _mapper.Map<Author>(authorDTO);
-            _context.Authors.Add(author);
-            await _context.SaveChangesAsync();
+            await _authorRepository.AddAsync(author);
 
             var createdAuthorDTO = _mapper.Map<AuthorDTO>(author);
             return new ActionResult<AuthorDTO>(createdAuthorDTO);
@@ -63,44 +48,34 @@ namespace Test_API.Services
 
         public async Task<ActionResult<AuthorDTO>> UpdateAuthor(int id, AuthorDTO authorDTO)
         {
-            var existingAuthor = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            var existingAuthor = await _authorRepository.GetByIdAsync(id);
             if (existingAuthor == null)
             {
                 return new NotFoundResult();
             }
 
             _mapper.Map(authorDTO, existingAuthor);
-            _context.Entry(existingAuthor).State = EntityState.Modified;
+            _authorRepository.Update(existingAuthor);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return new ConflictResult();
-            }
             var updatedAuthorDTO = _mapper.Map<AuthorDTO>(existingAuthor);
             return new ActionResult<AuthorDTO>(updatedAuthorDTO);
         }
 
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            var authorToDelete = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
+            var authorToDelete = await _authorRepository.GetByIdAsync(id);
             if (authorToDelete == null)
             {
                 return new NotFoundResult();
             }
 
-            _context.Authors.Remove(authorToDelete);
-            await _context.SaveChangesAsync();
-
+            _authorRepository.Remove(authorToDelete);
             return new OkResult();
         }
 
         public async Task<GetAuthorDTO?> FindById(int id)
         {
-            var author = await _context.Authors.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+            var author = await _authorRepository.GetByIdAsync(id);
             return _mapper.Map<GetAuthorDTO?>(author);
         }
     }
