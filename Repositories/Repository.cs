@@ -17,7 +17,7 @@ namespace Test_API.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+        return await _dbSet.ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)
@@ -28,7 +28,6 @@ namespace Test_API.Repositories
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IQueryable<T>>? include = null)
         {
             IQueryable<T> query = _dbSet;
-
             if (include != null)
             {
                 query = include(query);
@@ -54,7 +53,10 @@ namespace Test_API.Repositories
 
         public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
         {
-            return predicate == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(predicate);
+            if(predicate == null)
+            return await _dbSet.CountAsync();
+            else
+                return await _dbSet.CountAsync(predicate);
         }
     }
 }

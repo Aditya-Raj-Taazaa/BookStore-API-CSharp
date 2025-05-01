@@ -22,7 +22,7 @@ namespace Test_API.Services
 
         public async Task<int> CountAsync(string? title = null, int? price = null)
         {
-            return await _bookRepository.CountAsync(b =>
+        return await _bookRepository.CountAsync(b =>
                 (string.IsNullOrEmpty(title) || b.Title.Contains(title)) &&
                 (!price.HasValue || b.Price == price));
         }
@@ -45,7 +45,7 @@ namespace Test_API.Services
                 return new BadRequestObjectResult($"Author with ID {bookDTO.AuthorId} does not exist.");
             }
 
-            var book = _mapper.Map<Book>(bookDTO);
+            var book =_mapper.Map<Book>(bookDTO);
             await _bookRepository.AddAsync(book);
             return new ActionResult<BookDTO>(_mapper.Map<BookDTO>(book));
         }
@@ -55,7 +55,7 @@ namespace Test_API.Services
             var existingBook = await _bookRepository.GetByIdAsync(id);
             if (existingBook == null)
             {
-                return new NotFoundResult();
+                    return new NotFoundResult();
             }
 
             _mapper.Map(bookDTO, existingBook);
