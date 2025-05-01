@@ -7,7 +7,6 @@ using Test_API.Services;
 using Test_API.DTO;
 using Test_API.Interfaces;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 var services = builder.Services;
@@ -18,21 +17,17 @@ services.AddControllers(options =>
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
-
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 services.AddAutoMapper(typeof(MappingProfile));
 
+services.AddSingleton<IAppInfoService, AppInfoService>();
+services.AddSingleton<IRequestAuditServices,RequestAuditService>();
 
-services.AddSingleton<AppInfoService>();
-services.AddSingleton<RequestAuditService>();
-
-services.AddScoped<FormatterService>();
+services.AddScoped<IFormatterService,FormatterService>();
 services.AddScoped<DataSeeder>();
-services.AddScoped<IBookService,BookService>();
-services.AddScoped<IAuthorService,AuthorService>();
-
-
+services.AddScoped<IBookService, BookService>();
+services.AddScoped<IAuthorService, AuthorService>();
 
 services.AddDbContextPool<BookdbContext>(options =>
     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
@@ -43,7 +38,6 @@ void ApplyMigrations(WebApplication app)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<BookdbContext>();
 
-        
         var pendingMigrations = dbContext.Database.GetPendingMigrations();
         if (pendingMigrations.Any())
         {

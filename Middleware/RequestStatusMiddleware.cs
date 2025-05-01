@@ -1,14 +1,14 @@
-using Test_API.Services;
+using Test_API.Interfaces;
 
 namespace Test_API.Middleware
 {
     public class RequestStatusMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly AppInfoService _appInfoService;
-        private readonly RequestAuditService _requestAuditService;
+        private readonly IAppInfoService _appInfoService;
+        private readonly IRequestAuditServices _requestAuditService;
 
-        public RequestStatusMiddleware(RequestDelegate next, AppInfoService appInfoService, RequestAuditService requestAuditService)
+        public RequestStatusMiddleware(RequestDelegate next, IAppInfoService appInfoService, IRequestAuditServices requestAuditService)
         {
             _next = next;
             _appInfoService = appInfoService;

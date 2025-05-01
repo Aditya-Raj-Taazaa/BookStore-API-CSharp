@@ -1,7 +1,4 @@
 ﻿using Test_API.Interfaces;
-{
-    
-}
 namespace Test_API.Services
 {
     public class FormatterService : IFormatterService
