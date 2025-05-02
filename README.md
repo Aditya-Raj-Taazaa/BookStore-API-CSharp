@@ -18,25 +18,34 @@
 ## Components :
 
 ### Controllers
-* Mediator between External Request/Client Layer and Service Layer
-* Consists of API paths
+    |
+    |- Mediator between External Request/Client Layer and Service Layer
+    |
+    |- Consists of API paths
 
 ### Services
-* Mediator between Controllers and Repository layer
-* Consists of Business Logic
+    |
+    |- Mediator between Controllers and Repository layer
+    |
+    |- Consists of Business Logic
 
 ### Repositories 
-* Connects Services and Storage Layer to enhance Abstraction.
-* Consists of Concrete Implementation.
+    |
+    |- Connects Services and Storage Layer to enhance Abstraction.
+    |
+    |- Consists of Concrete Implementation.
 
 ### Interfaces
-* Enforces Abstraction and Encapsulation with Loose Coupling between Components.
+    |
+    |- Enforces Abstraction and Encapsulation with Loose Coupling between Components.
 
 ### DTOs (Data Transfer Objects)
-* Abstraction and Behaviour Enforcing for Domains and its Methods.
+    |
+    |- Abstraction and Behaviour Enforcing for Domains and its Methods.
 
 ### Middlewares
-* Logs HTTP method with Color Grading based on Specific type of Request, path, and timestamp 
+    |
+    |- Logs HTTP method with Color Grading based on Specific type of Request, path, and timestamp 
 
 ## Data Storage Layer :
 
@@ -49,7 +58,7 @@
           |- AuthorId
     BOOK -|- Title
           |- Price
-          |- Author (Navigation Property) 
+          |- Author (Fetch using Navigation Property) 
           |- Id
 
            |- Id
