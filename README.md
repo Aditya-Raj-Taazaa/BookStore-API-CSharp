@@ -1,18 +1,18 @@
 # BookStore API
 
-                                                                 Request
-                                                                    ||
-                                                                    \/
-                                                                Controller
-                                                                    ||
-                                                                    \/
-                                                                Services
-                                                                    ||
-                                                                    \/
-                                                                Repository
-                                                                    ||
-                                                                    \/
-                                                        Data Storage (PSQL, SQL, Redis)
+                                                 Request
+                                                    ||
+                                                    \/
+                                                Controller
+                                                    ||
+                                                    \/
+                                                 Services
+                                                    ||
+                                                    \/
+                                                Repository
+                                                    ||
+                                                    \/
+                                        Data Storage (PSQL, SQL, Redis)
 
 
 ## Components :
