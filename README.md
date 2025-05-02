@@ -42,3 +42,17 @@
 
 ### PSQL 
 * Uses EFCore (ORM) for performing transactions with PSQL Database.
+
+### Domains
+
+          |- Id
+          |- AuthorId
+    BOOK -|- Title
+          |- Price
+          |- Author (Navigation Property) 
+          |- Id
+
+           |- Id
+    AUTHOR-|- Name
+           |- Bio
+
