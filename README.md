@@ -54,14 +54,13 @@
 
 ### Domains
 
-          |- Id
-          |- AuthorId
-    BOOK -|- Title
-          |- Price
-          |- Author (Fetch using Navigation Property) 
-          |- Id
-
-           |- Id
-    AUTHOR-|- Name
-           |- Bio
+          |- Id 
+          |- AuthorId <----------------------------------|   
+    BOOK--|- Title                                       |
+          |- Price                                       |
+          |- Author (Fetch using Navigation Property)    |
+                                                         |
+            |- Id <--------------------------------------|
+    AUTHOR--|- Name                                      
+            |- Bio                                       
 
