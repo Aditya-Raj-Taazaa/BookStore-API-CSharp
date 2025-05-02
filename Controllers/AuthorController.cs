@@ -88,17 +88,13 @@ namespace Test_API.Controllers
                 var result = await _authorService.UpdateAuthor(id, authorDTO);
 
                 if (result.Result is BadRequestResult)
-                {
                     return BadRequest("The provided ID does not match the author ID.");
-                }
+                
                 if (result.Result is NotFoundResult)
-                {
                     return NotFound("The author with the specified ID was not found.");
-                }
+                
                 if (result.Result is ConflictResult)
-                {
                     return Conflict("A concurrency issue occurred while updating the author.");
-                }
 
                 return Ok(result.Value);
             }
@@ -117,9 +113,7 @@ namespace Test_API.Controllers
                 var result = await _authorService.DeleteAuthor(id);
 
                 if (result is NotFoundResult)
-                {
                     return NotFound($"The author with ID {id} was not found.");
-                }
 
                 return result;
             }
