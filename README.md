@@ -21,42 +21,42 @@
 
 ## Components :
 
-### Controllers
+### Controllers 🕹️
     |
-    |- Mediator between External Request/Client Layer and Service Layer
+    |-> Mediator between External Request/Client Layer and Service Layer
     |
-    |- Consists of API paths
+    |-> Consists of API paths
 
-### Services
+### Services 👨‍🔧
     |
-    |- Mediator between Controllers and Repository layer
+    |-> Mediator between Controllers and Repository layer
     |
-    |- Consists of Business Logic
+    |-> Consists of Business Logic
 
-### Repositories 
+### Repositories 🗃️
     |
-    |- Connects Services and Storage Layer to enhance Abstraction.
+    |-> Connects Services and Storage Layer to enhance Abstraction.
     |
-    |- Consists of Concrete Implementation.
+    |-> Consists of Concrete Implementation.
 
-### Interfaces
+### Interfaces 🧩
     |
-    |- Enforces Abstraction and Encapsulation with Loose Coupling between Components.
+    |-> Enforces Abstraction and Encapsulation with Loose Coupling between Components.
 
-### DTOs (Data Transfer Objects)
+### DTOs (Data Transfer Objects) 🔁
     |
-    |- Abstraction and Behaviour Enforcing for Domains and its Methods.
+    |-> Abstraction and Behaviour Enforcing for Domains and its Methods.
 
-### Middlewares
+### Middlewares 🌉
     |
-    |- Logs HTTP method with Color Grading based on Specific type of Request, path, and timestamp 
+    |-> Logs HTTP method with Color Grading based on Specific type of Request, path, and timestamp 
 
 ## Data Storage Layer :
 
 ### PSQL 
 * Uses EFCore (ORM) for performing transactions with PSQL Database.
 
-### Domains
+### Domains 🗂️
 
           |- Id 
           |- AuthorId <----------------------------------|   
