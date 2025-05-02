@@ -1,15 +1,19 @@
-# BookStore API
+# BookStore 📚 API
 
                                                  Request
+                                                    /\
                                                     ||
                                                     \/
                                                 Controller
+                                                    /\
                                                     ||
                                                     \/
                                                  Services
+                                                    /\
                                                     ||
                                                     \/
                                                 Repository
+                                                    /\
                                                     ||
                                                     \/
                                         Data Storage (PSQL, SQL, Redis)
