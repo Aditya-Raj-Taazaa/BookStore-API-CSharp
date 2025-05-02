@@ -20,12 +20,12 @@ namespace Test_API.Services
             _mapper = mapper;
         }
 
-        public async Task<int> CountAsync(string? title = null, int? price = null)
-        {
-        return await _bookRepository.CountAsync(b =>
-                (string.IsNullOrEmpty(title) || b.Title.Contains(title)) &&
-                (!price.HasValue || b.Price == price));
-        }
+            public async Task<int> CountAsync(string? title = null, int? price = null)
+            {
+            return await _bookRepository.CountAsync(b =>
+                    (string.IsNullOrEmpty(title) || b.Title.Contains(title)) &&
+                    (!price.HasValue || b.Price == price));
+            }
 
         public async Task<IEnumerable<GetBookDTO>> ListAsync(BookFilterDTO filter)
 {
@@ -43,7 +43,7 @@ namespace Test_API.Services
             if (!authorExists)
             {
                 return new BadRequestObjectResult($"Author with ID {bookDTO.AuthorId} does not exist.");
-            }
+             }
 
             var book =_mapper.Map<Book>(bookDTO);
             await _bookRepository.AddAsync(book);
