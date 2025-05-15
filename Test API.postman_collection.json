@@ -1,0 +1,286 @@
+{
+	"info": {
+		"_postman_id": "52a22ffd-c6b9-4181-8ea5-4a8df6ba6ca4",
+		"name": "Test API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43273758"
+	},
+	"item": [
+		{
+			"name": "Books 📚",
+			"item": [
+				{
+					"name": "List Books",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Books",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Books"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Books' \\\r\n  -H 'accept: text/plain'"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Harry Potter and The Sorcerer's Stone\",\r\n    \"price\": 40,\r\n    \"authorId\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7054/api/Books",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Books"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\r\n  'https://localhost:7054/api/Books' \\\r\n  -H 'accept: text/plain' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"title\": \"Book Title\",\r\n    \"price\": 29,\r\n    \"authorId\": 1\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Books/v2/11",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Books",
+								"v2",
+								"11"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Books/v2/11' \\\r\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Count Books",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Books/count",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Books",
+								"count"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Books/count' \\\r\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Books/13",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Books",
+								"13"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\r\n  'https://localhost:7054/api/Books/13' \\\r\n  -H 'accept: */*'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authors ✍️",
+			"item": [
+				{
+					"name": "List Authors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Authors",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Authors"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Authors' \\\r\n  -H 'accept: text/plain'"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Author",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "text/plain"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"J.K Rowling\",\r\n   \"bio\": \"Writer from England\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7054/api/Authors",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Authors"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\r\n  'https://localhost:7054/api/Authors' \\\r\n  -H 'accept: text/plain' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"name\": \"John Doe\",\r\n   \"bio\": \"Author bio here\"\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Author By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Authors/7",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Authors",
+								"7"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Authors/7' \\\r\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Count Author",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "https://localhost:7054/api/Authors/count",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7054",
+							"path": [
+								"api",
+								"Authors",
+								"count"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\r\n  'https://localhost:7054/api/Authors/count' \\\r\n  -H 'accept: */*'"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
