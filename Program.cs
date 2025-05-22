@@ -55,6 +55,16 @@ void ApplyMigrations(WebApplication app)
     }
 }
 
+services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -72,6 +82,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     ApplyMigrations(app);
 }
+app.UseCors("AllowAll");
 
 app.UseMiddleware<RequestStatusMiddleware>();
 

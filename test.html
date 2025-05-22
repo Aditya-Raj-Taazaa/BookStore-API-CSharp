@@ -1,0 +1,36 @@
+<!-- 
+Test CORS with curl:
+curl --location 'https://localhost:7054/api/Books/GetBookDetails' ^
+--header 'Content-Type: application/json' ^
+--data '{
+    "page": 1,
+    "pageSize": 10,
+    "title": "H",
+    "price": 29,
+    "author": "J"
+}'
+-->
+
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+fetch('https://localhost:7054/api/Books/GetBookDetails', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    page: 1,
+    pageSize: 10,
+    title: "H",
+    price: 29,
+    author: "J"
+  })
+})
+  .then(response => response.json())
+  .then(data => console.log('Success:', data))
+  .catch(error => console.error('Error:', error));
+</script>
+</body>
+</html>

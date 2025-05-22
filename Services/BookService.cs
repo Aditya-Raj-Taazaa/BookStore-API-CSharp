@@ -22,20 +22,20 @@ namespace Test_API.Services
 
             public async Task<int> CountAsync(string? title = null, int? price = null)
             {
-            return await _bookRepository.CountAsync(b =>
+                    return await _bookRepository.CountAsync(b =>
                     (string.IsNullOrEmpty(title) || b.Title.Contains(title)) &&
                     (!price.HasValue || b.Price == price));
             }
 
-        public async Task<IEnumerable<GetBookDTO>> ListAsync(BookFilterDTO filter)
-{
-    var books = await _bookRepository.FindAsync(b =>
-        (string.IsNullOrEmpty(filter.Title) || b.Title.Contains(filter.Title)) &&
-        (filter.Price <= 0 || b.Price == filter.Price),
-        include: query => query.Include(b => b.Author)); 
+            public async Task<IEnumerable<GetBookDTO>> ListAsync(BookFilterDTO filter)
+            {
+                var books = await _bookRepository.FindAsync(b =>
+                    (string.IsNullOrEmpty(filter.Title) || b.Title.Contains(filter.Title)) &&
+                    (!filter.Price.HasValue || b.Price == filter.Price),
+                    include: query => query.Include(b => b.Author)); 
 
-    return _mapper.Map<IEnumerable<GetBookDTO>>(books);
-}
+                return _mapper.Map<IEnumerable<GetBookDTO>>(books);
+            }
 
         public async Task<ActionResult<BookDTO>> Post(BookDTO bookDTO)
         {
