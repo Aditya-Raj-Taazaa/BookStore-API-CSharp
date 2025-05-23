@@ -39,6 +39,7 @@ namespace Test_API.Repositories
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
+             await _context.SaveChangesAsync();
         }
 
         public void Update(T entity)

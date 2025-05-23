@@ -71,6 +71,10 @@ namespace Test_API.Controllers
             try
             {
                 var result = await _authorService.Post(authorDTO);
+                if (result.Result is BadRequestObjectResult badRequest)
+                {
+                    return BadRequest(badRequest.Value);
+                }
                 return CreatedAtAction(nameof(GetById), new { id = result.Value?.Id }, result.Value);
             }
             catch (Exception ex)
